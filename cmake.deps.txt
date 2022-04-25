@@ -1,0 +1,130 @@
+# -*- cmake -*-
+
+###
+include(FetchContent)
+set(CT_CLAP_FETCH_VERSION "874619974e3e03a2314921dba33977599ecbab17")
+set(CT_PUGL_FETCH_VERSION "7a51a9f66332f758c0b590598f0a43ad14686c5a")
+set(CT_IMGUI_FETCH_VERSION "709bc03d6f07467fe10f892f9198913f0298b58e")
+
+FetchContent_Declare(clap
+  GIT_REPOSITORY "https://github.com/free-audio/clap.git"
+  GIT_TAG "${CT_CLAP_FETCH_VERSION}")
+
+FetchContent_Declare(pugl
+  GIT_REPOSITORY "https://github.com/lv2/pugl.git"
+  GIT_TAG "${CT_PUGL_FETCH_VERSION}")
+
+FetchContent_Declare(imgui
+  GIT_REPOSITORY "https://github.com/ocornut/imgui.git"
+  GIT_TAG "${CT_IMGUI_FETCH_VERSION}")
+
+###
+add_library(ct-clap INTERFACE)
+if(CT_CLAP_SOURCE_DIR)
+  message(STATUS "External CLAP headers: ${CT_CLAP_SOURCE_DIR}/include")
+  target_include_directories(ct-clap INTERFACE "${CT_CLAP_SOURCE_DIR}/include")
+else()
+  message(STATUS "Fetching CLAP: version ${CT_CLAP_FETCH_VERSION}")
+  FetchContent_GetProperties(clap)
+  if(NOT clap_POPULATED)
+    FetchContent_Populate(clap)
+  endif()
+  message(STATUS "Fetched CLAP headers: ${clap_SOURCE_DIR}/include")
+  target_include_directories(ct-clap INTERFACE "${clap_SOURCE_DIR}/include")
+endif()
+
+###
+add_library(ct-travesty INTERFACE)
+target_include_directories(ct-travesty INTERFACE "thirdparty/travesty/include")
+
+###
+add_library(ct-uuid STATIC EXCLUDE_FROM_ALL "sources/libs/lib_uuid.c")
+
+###
+add_library(ct-utf8 INTERFACE)
+target_include_directories(ct-utf8 INTERFACE "thirdparty/utf/include")
+
+###
+add_library(ct-scope-lite INTERFACE)
+target_include_directories(ct-scope-lite INTERFACE "thirdparty/scope-lite/include")
+
+###
+add_library(ct-string-view-lite INTERFACE)
+target_include_directories(ct-string-view-lite INTERFACE "thirdparty/string-view-lite/include")
+
+###
+add_library(ct-span-lite INTERFACE)
+target_include_directories(ct-span-lite INTERFACE "thirdparty/span-lite/include")
+
+###
+if(CT_EXAMPLES)
+  if(APPLE)
+    find_library(CT_COCOA_LIBRARY "Cocoa")
+  endif()
+
+  ###
+  if(NOT WIN32 AND NOT APPLE)
+    find_package(X11 REQUIRED)
+  endif()
+
+  if(NOT OpenGL_GL_PREFERENCE)
+    set(OpenGL_GL_PREFERENCE GLVND)
+  endif()
+
+  find_package(OpenGL REQUIRED)
+
+  ###
+  message(STATUS "Fetching Pugl: version ${CT_PUGL_FETCH_VERSION}")
+  FetchContent_GetProperties(pugl)
+  if(NOT pugl_POPULATED)
+    FetchContent_Populate(pugl)
+  endif()
+  message(STATUS "Fetched Pugl: ${pugl_SOURCE_DIR}")
+
+  add_library(ct-pugl STATIC EXCLUDE_FROM_ALL
+    "${pugl_SOURCE_DIR}/src/implementation.c")
+  target_compile_definitions(ct-pugl PUBLIC
+    "PUGL_API="
+    "PUGL_STATIC"
+    "PUGL_DISABLE_DEPRECATED")
+  if(WIN32)
+    target_sources(ct-pugl PRIVATE
+      "${pugl_SOURCE_DIR}/src/win.c"
+      "${pugl_SOURCE_DIR}/src/win_gl.c")
+  elseif(APPLE)
+    target_sources(ct-pugl PRIVATE
+      "${pugl_SOURCE_DIR}/src/mac.m"
+      "${pugl_SOURCE_DIR}/src/mac_gl.m")
+    target_compile_definitions(ct-pugl PRIVATE "GL_SILENCE_DEPRECATION")
+    target_link_libraries(ct-pugl PRIVATE "${CT_COCOA_LIBRARY}")
+  else()
+    target_sources(ct-pugl PRIVATE
+      "${pugl_SOURCE_DIR}/src/x11.c"
+      "${pugl_SOURCE_DIR}/src/x11_gl.c")
+    target_compile_definitions(ct-pugl PRIVATE "HAVE_XCURSOR" "HAVE_XRANDR"  "HAVE_XSYNC")
+    target_include_directories(ct-pugl PRIVATE "${X11_INCLUDE_DIR}")
+    target_link_libraries(ct-pugl PRIVATE "${X11_X11_LIB}" "${X11_Xcursor_LIB}" "${X11_Xrandr_LIB}" "${X11_Xext_LIB}")
+  endif()
+  target_include_directories(ct-pugl PUBLIC "${pugl_SOURCE_DIR}/include")
+  target_link_libraries(ct-pugl PRIVATE OpenGL::OpenGL)
+
+  ###
+  message(STATUS "Fetching ImGui: version ${CT_IMGUI_FETCH_VERSION}")
+  FetchContent_GetProperties(imgui)
+  if(NOT imgui_POPULATED)
+    FetchContent_Populate(imgui)
+  endif()
+  message(STATUS "Fetched ImGui: ${imgui_SOURCE_DIR}")
+
+  add_library(ct-imgui STATIC EXCLUDE_FROM_ALL
+    "${imgui_SOURCE_DIR}/imgui.cpp"
+    "${imgui_SOURCE_DIR}/imgui_draw.cpp"
+    "${imgui_SOURCE_DIR}/imgui_tables.cpp"
+    "${imgui_SOURCE_DIR}/imgui_widgets.cpp"
+    "${imgui_SOURCE_DIR}/backends/imgui_impl_opengl2.cpp"
+    "${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp")
+  target_include_directories(ct-imgui PUBLIC
+    "${imgui_SOURCE_DIR}"
+    "${imgui_SOURCE_DIR}/backends"
+    "${imgui_SOURCE_DIR}/misc/cpp")
+endif()
