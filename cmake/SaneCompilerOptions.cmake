@@ -1,0 +1,20 @@
+if(MSVC)
+  add_compile_options(
+    "/utf-8"
+    "$<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>")
+else()
+  add_compile_options(
+    "-Wall"
+    "-Wextra"
+    "-Werror=return-type")
+endif()
+
+if(WIN32)
+  add_definitions(
+    "-DNOMINMAX"
+    "-D_USE_MATH_DEFINES"
+    "-D_CRT_SECURE_NO_WARNINGS")
+else()
+  add_definitions(
+    "-D_FILE_OFFSET_BITS=64")
+endif()
