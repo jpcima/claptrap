@@ -1,0 +1,111 @@
+# -*- cmake -*-
+
+###
+include(VST3BundleArchitecture)
+
+function(add_v3_plugin TARGET)
+  cmake_parse_arguments("arg"
+    "HIGH_RESOLUTION_CAPABLE"
+    "NAME;VERSION;COPYRIGHT;BUNDLE_IDENTIFIER"
+    "SOURCES;RESOURCES"
+    "${ARGN}")
+
+  if(NOT arg_NAME)
+    message(FATAL_ERROR "The required argument NAME is missing.")
+  endif()
+  if(NOT arg_BUNDLE_IDENTIFIER)
+    message(FATAL_ERROR "The required argument BUNDLE_IDENTIFIER is missing.")
+  endif()
+
+  add_library("${TARGET}" MODULE ${arg_SOURCES})
+  target_link_libraries("${TARGET}" PRIVATE ct-v3)
+  if(CT_HAVE_LINKER_FLAG_NO_UNDEFINED)
+    target_link_options("${TARGET}" PRIVATE "-Xlinker" "--no-undefined")
+  endif()
+
+  get_filename_component(_dir "${TARGET}.vst3" REALPATH BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+  set_property(TARGET "${TARGET}" PROPERTY PREFIX "")
+  if(WIN32)
+    target_sources("${TARGET}" PRIVATE "sources/v3/v3.def")
+    if(MINGW)
+      target_link_options("${TARGET}" PRIVATE "-static")
+    endif()
+    set_property(TARGET "${TARGET}" PROPERTY LIBRARY_OUTPUT_DIRECTORY "${_dir}/Contents/${VST3_BUNDLE_ARCHITECTURE}-win/$<0:>")
+    set_property(TARGET "${TARGET}" PROPERTY SUFFIX ".vst3")
+  elseif(APPLE)
+    set_property(TARGET "${TARGET}" PROPERTY LIBRARY_OUTPUT_DIRECTORY "${_dir}/Contents/MacOS/$<0:>")
+    set_property(TARGET "${TARGET}" PROPERTY SUFFIX "")
+  else()
+    set_property(TARGET "${TARGET}" PROPERTY LIBRARY_OUTPUT_DIRECTORY "${_dir}/Contents/${VST3_BUNDLE_ARCHITECTURE}-linux/$<0:>")
+  endif()
+
+  # write Info.plist and PkgInfo
+  if(APPLE)
+    set(_plist_version "${CMAKE_PROJECT_VERSION}")
+    if(arg_VERSION)
+      set(_plist_version "${arg_VERSION}")
+    endif()
+    set(_plist_high_res_cap "false")
+    if(arg_HIGH_RESOLUTION_CAPABLE)
+      set(_plist_high_res_cap "true")
+    endif()
+    file(WRITE "${_dir}/Contents/Info.plist"
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist>
+  <dict>
+    <key>CFBundleExecutable</key>
+    <string>${TARGET}</string>
+    <key>CFBundleIconFile</key>
+    <string></string>
+    <key>CFBundleIdentifier</key>
+    <string>${arg_BUNDLE_IDENTIFIER}</string>
+    <key>CFBundleName</key>
+    <string>${TARGET}</string>
+    <key>CFBundleDisplayName</key>
+    <string>${arg_NAME}</string>
+    <key>CFBundlePackageType</key>
+    <string>BNDL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>${_plist_version}</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>${arg_COPYRIGHT}</string>
+    <key>NSHighResolutionCapable</key>
+    <${_plist_high_res_cap}/>
+  </dict>
+</plist>
+")
+    file(WRITE "${_dir}/Contents/PkgInfo" "BNDL????")
+  endif()
+
+  if(arg_RESOURCES)
+    add_v3_resources("${TARGET}" ${arg_RESOURCES})
+  endif()
+endfunction()
+
+function(add_v3_resources TARGET RESOURCES)
+  set(_deps)
+  get_filename_component(_outdir "${TARGET}.vst3" REALPATH BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+  foreach(_res IN LISTS RESOURCES)
+    string(FIND "${_res}" "//" _pos)
+    if(_pos EQUAL -1)
+      message(FATAL_ERROR "Resource path must contain \"//\" as root separator.")
+    endif()
+    string(SUBSTRING "${_res}" "${_pos}" -1 _part)
+    set(_outpath "${_outdir}/Contents/Resources/${_part}")
+    get_filename_component(_inpath "${_res}" REALPATH BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_custom_command(
+      OUTPUT "${_outpath}"
+      COMMAND "${CMAKE_COMMAND}" "-E" "copy" "${_inpath}" "${_outpath}"
+      DEPENDS "${_inpath}")
+    list(APPEND _deps "${_outpath}")
+  endforeach()
+  set(_no 1)
+  while(TARGET "${TARGET}-v3-resource-${_no}")
+    math(EXPR _no "${_no}+1")
+  endwhile()
+  add_custom_target("${TARGET}-v3-resource-${_no}" DEPENDS "${_deps}")
+  add_dependencies("${TARGET}" "${TARGET}-v3-resource-${_no}")
+endfunction()

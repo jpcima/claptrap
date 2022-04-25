@@ -1,0 +1,8 @@
+# -*- gitignore -*-
+
+# Let ripgrep search FetchContent sources
+!/build/
+/build/*
+!/build/_deps/
+/build/_deps/*
+!/build/_deps/*-src/

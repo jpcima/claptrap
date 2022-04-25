@@ -1,0 +1,199 @@
+# -*- cmake -*-
+
+###
+include(CheckCSourceCompiles)
+include(CheckCXXSourceCompiles)
+
+function(ct_check_linker_options VAR)
+  set(CMAKE_REQUIRED_LINK_OPTIONS ${ARGN})
+  if(MSVC)
+    list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "/WX")
+  endif()
+  check_c_source_compiles("int main() { return 0; }" "${VAR}")
+endfunction()
+
+ct_check_linker_options(CT_HAVE_LINKER_FLAG_NO_UNDEFINED "-Xlinker" "--no-undefined")
+
+###
+include(FetchContent)
+set(CT_CLAP_FETCH_VERSION "874619974e3e03a2314921dba33977599ecbab17")
+set(CT_VSTGUI_FETCH_VERSION "bdc3b71b96c1356face2e18f044ad62eb60fecbf")
+
+FetchContent_Declare(clap
+  GIT_REPOSITORY "https://github.com/free-audio/clap.git"
+  GIT_TAG "${CT_CLAP_FETCH_VERSION}")
+
+FetchContent_Declare(vstgui
+  GIT_REPOSITORY "https://github.com/steinbergmedia/vstgui.git"
+  GIT_TAG "${CT_VSTGUI_FETCH_VERSION}")
+
+###
+add_library(ct-clap INTERFACE)
+if(CT_CLAP_SOURCE_DIR)
+  message(STATUS "External CLAP headers: ${CT_CLAP_SOURCE_DIR}/include")
+  target_include_directories(ct-clap INTERFACE "${CT_CLAP_SOURCE_DIR}/include")
+else()
+  message(STATUS "Fetching CLAP: version ${CT_CLAP_FETCH_VERSION}")
+  FetchContent_GetProperties(clap)
+  if(NOT clap_POPULATED)
+    FetchContent_Populate(clap)
+  endif()
+  message(STATUS "Fetched CLAP headers: ${clap_SOURCE_DIR}/include")
+  target_include_directories(ct-clap INTERFACE "${clap_SOURCE_DIR}/include")
+endif()
+
+###
+add_library(ct-travesty INTERFACE)
+target_include_directories(ct-travesty INTERFACE "thirdparty/travesty/include")
+
+###
+add_library(ct-uuid STATIC EXCLUDE_FROM_ALL "sources/libs/lib_uuid.c")
+
+###
+add_library(ct-utf8 INTERFACE)
+target_include_directories(ct-utf8 INTERFACE "thirdparty/utf/include")
+
+###
+add_library(ct-scope-lite INTERFACE)
+target_include_directories(ct-scope-lite INTERFACE "thirdparty/scope-lite/include")
+
+###
+add_library(ct-string-view-lite INTERFACE)
+target_include_directories(ct-string-view-lite INTERFACE "thirdparty/string-view-lite/include")
+
+###
+add_library(ct-span-lite INTERFACE)
+target_include_directories(ct-span-lite INTERFACE "thirdparty/span-lite/include")
+
+### dependencies below are for examples only
+if(NOT CT_EXAMPLES)
+  return()
+endif()
+
+###
+find_package(PkgConfig)
+
+###
+add_library(ct-dl INTERFACE)
+find_library(CT_DL_LIBRARY "dl")
+if(CT_DL_LIBRARY)
+  target_link_libraries(ct-dl INTERFACE "${CT_DL_LIBRARY}")
+endif()
+
+###
+# Find macOS system libraries
+if(APPLE)
+  find_library(CT_APPLE_COREFOUNDATION_LIBRARY "CoreFoundation")
+  find_library(CT_APPLE_FOUNDATION_LIBRARY "Foundation")
+  find_library(CT_APPLE_COCOA_LIBRARY "Cocoa")
+  find_library(CT_APPLE_CARBON_LIBRARY "Carbon")
+  find_library(CT_APPLE_OPENGL_LIBRARY "OpenGL")
+  find_library(CT_APPLE_ACCELERATE_LIBRARY "Accelerate")
+  find_library(CT_APPLE_QUARTZCORE_LIBRARY "QuartzCore")
+  find_library(CT_APPLE_AUDIOTOOLBOX_LIBRARY "AudioToolbox")
+  find_library(CT_APPLE_AUDIOUNIT_LIBRARY "AudioUnit")
+  find_library(CT_APPLE_COREAUDIO_LIBRARY "CoreAudio")
+  find_library(CT_APPLE_COREMIDI_LIBRARY "CoreMIDI")
+endif()
+
+###
+message(STATUS "Fetching VSTGUI: version ${CT_VSTGUI_FETCH_VERSION}")
+FetchContent_GetProperties(vstgui)
+if(NOT vstgui_POPULATED)
+  FetchContent_Populate(vstgui)
+endif()
+message(STATUS "Fetched VSTGUI: ${vstgui_SOURCE_DIR}")
+
+if(WIN32)
+  add_library(ct-vstgui STATIC EXCLUDE_FROM_ALL
+    "${vstgui_SOURCE_DIR}/vstgui/vstgui_win32.cpp")
+elseif(APPLE)
+  add_library(ct-vstgui STATIC EXCLUDE_FROM_ALL
+    "${vstgui_SOURCE_DIR}/vstgui/vstgui_mac.mm")
+else()
+  add_library(ct-vstgui STATIC EXCLUDE_FROM_ALL
+    "${vstgui_SOURCE_DIR}/vstgui/vstgui_linux.cpp")
+endif()
+
+if(NOT MSVC)
+  target_compile_options(ct-vstgui PRIVATE "-Wno-multichar")
+endif()
+
+target_include_directories(ct-vstgui PUBLIC "${vstgui_SOURCE_DIR}")
+target_link_libraries(ct-vstgui PRIVATE ct-dl)
+
+if(WIN32)
+  if(NOT MSVC)
+    # autolinked on MSVC with pragmas
+    target_link_libraries(ct-vstgui PRIVATE
+      "opengl32"
+      "d2d1"
+      "dwrite"
+      "dwmapi"
+      "windowscodecs"
+      "shlwapi")
+  endif()
+elseif(APPLE)
+  target_link_libraries(ct-vstgui PRIVATE
+    "${CT_APPLE_COREFOUNDATION_LIBRARY}"
+    "${CT_APPLE_FOUNDATION_LIBRARY}"
+    "${CT_APPLE_COCOA_LIBRARY}"
+    "${CT_APPLE_OPENGL_LIBRARY}"
+    "${CT_APPLE_ACCELERATE_LIBRARY}"
+    "${CT_APPLE_QUARTZCORE_LIBRARY}"
+    "${CT_APPLE_CARBON_LIBRARY}"
+    "${CT_APPLE_AUDIOTOOLBOX_LIBRARY}"
+    "${CT_APPLE_COREAUDIO_LIBRARY}"
+    "${CT_APPLE_COREMIDI_LIBRARY}")
+else()
+  find_package(Freetype REQUIRED)
+  pkg_check_modules(ct-libxcb REQUIRED "xcb" IMPORTED_TARGET)
+  pkg_check_modules(ct-libxcb-util REQUIRED "xcb-util" IMPORTED_TARGET)
+  pkg_check_modules(ct-libxcb-cursor REQUIRED "xcb-cursor" IMPORTED_TARGET)
+  pkg_check_modules(ct-libxcb-keysyms REQUIRED "xcb-keysyms" IMPORTED_TARGET)
+  pkg_check_modules(ct-libxcb-xkb REQUIRED "xcb-xkb" IMPORTED_TARGET)
+  pkg_check_modules(ct-libxkb-common REQUIRED "xkbcommon" IMPORTED_TARGET)
+  pkg_check_modules(ct-libxkb-common-x11 REQUIRED "xkbcommon-x11" IMPORTED_TARGET)
+  pkg_check_modules(ct-cairo REQUIRED "cairo" IMPORTED_TARGET)
+  pkg_check_modules(ct-pango REQUIRED "pangocairo pangoft2" IMPORTED_TARGET)
+  pkg_check_modules(ct-fontconfig REQUIRED "fontconfig" IMPORTED_TARGET)
+  pkg_check_modules(ct-glib REQUIRED "glib-2.0" IMPORTED_TARGET)
+  target_link_libraries(ct-vstgui PRIVATE
+    Freetype::Freetype
+    PkgConfig::ct-libxcb
+    PkgConfig::ct-libxcb-util
+    PkgConfig::ct-libxcb-cursor
+    PkgConfig::ct-libxcb-keysyms
+    PkgConfig::ct-libxcb-xkb
+    PkgConfig::ct-libxkb-common
+    PkgConfig::ct-libxkb-common-x11
+    PkgConfig::ct-cairo
+    PkgConfig::ct-pango
+    PkgConfig::ct-fontconfig
+    PkgConfig::ct-glib)
+endif()
+
+if(CT_LIVE_EDITING)
+  target_compile_definitions(ct-vstgui PUBLIC "VSTGUI_LIVE_EDITING")
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES "Rel.*")
+  target_compile_definitions(ct-vstgui PUBLIC "RELEASE")
+else()
+  target_compile_definitions(ct-vstgui PUBLIC "DEVELOPMENT")
+endif()
+
+if(WIN32)
+  # Set Windows 10 as target version
+  target_compile_definitions(ct-vstgui PRIVATE "WINVER=0x0A00" "_WIN32_WINNT=0x0A00")
+  # Windows 10 RS2 DDI for custom fonts
+  target_compile_definitions(ct-vstgui PRIVATE "NTDDI_VERSION=0x0A000003")
+endif()
+
+add_library(ct-uidescription STATIC EXCLUDE_FROM_ALL
+  "${vstgui_SOURCE_DIR}/vstgui/vstgui_uidescription.cpp")
+target_link_libraries(ct-uidescription PUBLIC ct-vstgui)
+
+if(NOT MSVC)
+  target_compile_options(ct-uidescription PRIVATE "-Wno-multichar")
+endif()

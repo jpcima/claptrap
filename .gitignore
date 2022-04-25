@@ -1,0 +1,5 @@
+/build/
+/trash/
+/.cache/
+
+.DS_Store
