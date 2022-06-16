@@ -16,6 +16,8 @@ ct_plug_view::ct_plug_view()
 
 ct_plug_view::~ct_plug_view()
 {
+    if (m_delete_hook)
+        m_delete_hook(this);
 }
 
 v3_result V3_API ct_plug_view::query_interface(void *self_, const v3_tuid iid, void **obj)
@@ -65,11 +67,8 @@ uint32_t V3_API ct_plug_view::unref(void *self_)
     uint32_t oldcnt = self->m_refcnt.fetch_sub(1, std::memory_order_acq_rel);
     uint32_t newcnt = oldcnt - 1;
 
-    if (newcnt == 0) {
-        if (self->m_delete_hook)
-            self->m_delete_hook(self);
+    if (newcnt == 0)
         delete self;
-    }
 
     LOG_PLUGIN_RET(newcnt);
 }
