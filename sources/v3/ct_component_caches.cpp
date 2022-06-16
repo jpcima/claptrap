@@ -215,8 +215,13 @@ void ct_caches::impl::cache_audio_ports(bool do_callback)
     if ((m_dirty_flags & cache_flags_audio_ports) == 0)
         return;
 
-    ports_t *audio_ports = new ports_t;
-    m_audio_ports.reset(audio_ports);
+    ports_t *audio_ports = m_audio_ports.get();
+    if (audio_ports)
+        *audio_ports = {};
+    else {
+        audio_ports = new ports_t;
+        m_audio_ports.reset(audio_ports);
+    }
 
     ct_component *comp = m_comp;
     const clap_plugin *plug = comp->m_plug;
@@ -250,8 +255,13 @@ void ct_caches::impl::cache_params()
     if ((m_dirty_flags & cache_flags_params) == 0)
         return;
 
-    params_t *cache = new params_t;
-    m_params.reset(cache);
+    params_t *cache = m_params.get();
+    if (cache)
+        *cache = {};
+    else {
+        cache = new params_t;
+        m_params.reset(cache);
+    }
 
     ct_component *comp = m_comp;
     const clap_plugin *plug = comp->m_plug;
