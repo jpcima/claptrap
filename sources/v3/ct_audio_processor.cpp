@@ -7,7 +7,6 @@
 #include "utility/ct_bump_allocator.hpp"
 #include "utility/ct_messages.hpp"
 #include "utility/ct_assert.hpp"
-#include <algorithm>
 #include <cstring>
 
 const ct_audio_processor::vtable ct_audio_processor::s_vtable;
@@ -126,8 +125,7 @@ v3_result V3_API ct_audio_processor::can_process_sample_size(void *self_, int32_
         LOG_PLUGIN_RET(V3_TRUE);
     }
     else if (symbolic_sample_size == V3_SAMPLE_64) {
-        if (comp->m_cache->get_audio_ports()->m_num_ports_supporting_64bit > 0)
-            LOG_PLUGIN_RET(V3_TRUE);
+        return comp->m_cache->get_audio_ports()->m_can_do_64bit;
     }
 
     LOG_PLUGIN_RET(V3_FALSE);
@@ -252,139 +250,109 @@ static void process_parameters_after(ct_audio_processor *self, v3_process_data *
 }
 
 ///
-static void process_prepare_buffers(ct_component *comp, v3_process_data *data, ct_bump_allocator *allocator, clap_process *clap_data)
+template <class T> T **&v3_buffer_ptrs(v3_audio_bus_buffers &ab);
+template <> inline float **&v3_buffer_ptrs<float>(v3_audio_bus_buffers &ab) { return ab.channel_buffers_32; }
+template <> inline double **&v3_buffer_ptrs<double>(v3_audio_bus_buffers &ab) { return ab.channel_buffers_64; }
+
+template <class T> T **v3_buffer_ptrs(const v3_audio_bus_buffers &ab);
+template <> inline float **v3_buffer_ptrs<float>(const v3_audio_bus_buffers &ab) { return ab.channel_buffers_32; }
+template <> inline double **v3_buffer_ptrs<double>(const v3_audio_bus_buffers &ab) { return ab.channel_buffers_64; }
+
+///
+template <class Real>
+static void prepare_processing_buffers(ct_component *comp, v3_process_data *data, ct_bump_allocator *allocator, clap_process *clap_data)
 {
     const ct_caches::ports_t *audio_ports = comp->m_cache->get_audio_ports();
 
-    uint32_t num_inputs = (uint32_t)audio_ports->m_inputs.size();
-    uint32_t num_outputs = (uint32_t)audio_ports->m_outputs.size();
-    clap_audio_buffer *inputs = allocator->typed_alloc<clap_audio_buffer>(num_inputs);
-    clap_audio_buffer *outputs = allocator->typed_alloc<clap_audio_buffer>(num_outputs);
-    CT_ASSERT(inputs);
-    CT_ASSERT(outputs);
-
-    clap_audio_buffer *ios[2];
-    ios[true] = inputs;
-    ios[false] = outputs;
-
-    uint32_t num_ios[2];
-    num_ios[true] = num_inputs;
-    num_ios[false] = num_outputs;
-
-    void *dummy_buffer[2];
-    dummy_buffer[true] = comp->m_zero_buffer.get();
-    dummy_buffer[false] = comp->m_trash_buffer.get();
-
     uint32_t nframes = (uint32_t)data->nframes;
-    bool proc64 = data->symbolic_sample_size == V3_SAMPLE_64;
 
-    for (bool is_input : {true, false}) {
-        const std::vector<ct_clap_port_info> &ports = audio_ports->get_port_list(is_input);
-        uint32_t num_ports = (uint32_t)ports.size();
+    // inputs
+    uint32_t num_inputs = (uint32_t)audio_ports->m_inputs.size();
+    clap_audio_buffer *inputs = allocator->typed_alloc<clap_audio_buffer>(num_inputs);
+    CT_ASSERT(inputs);
 
-        for (uint32_t p_idx = 0; p_idx < num_ports; ++p_idx) {
-            clap_audio_buffer port_data{};
-            const ct_clap_port_info &port = ports[p_idx];
-            uint32_t channel_count = port.channel_count;
-            bool pref64 = port.flags & CLAP_AUDIO_PORT_PREFERS_64BITS;
+    for (uint32_t p_idx = 0; p_idx < num_inputs; ++p_idx) {
+        clap_audio_buffer port_data{};
+        const ct_clap_port_info &port = audio_ports->m_inputs[p_idx];
+        uint32_t channel_count = port.channel_count;
 
-            bool have_port = p_idx < (uint32_t)(is_input ? data->num_input_buses : data->num_output_buses);
-            const v3_audio_bus_buffers *v3_port = (!have_port) ? nullptr :
-                (is_input ? &data->inputs[p_idx] : &data->outputs[p_idx]);
+        bool have_port = p_idx < (uint32_t)data->num_input_buses;
+        const v3_audio_bus_buffers *v3_port = (!have_port) ? nullptr : &data->inputs[p_idx];
 
-            if (proc64 || (!have_port && pref64)) {
-                port_data.data64 = allocator->typed_alloc<double *>(channel_count);
-                CT_ASSERT(port_data.data64);
-            }
+        audio_buffer_ptrs<Real>(port_data) = allocator->typed_alloc<Real *>(channel_count);
+        CT_ASSERT(audio_buffer_ptrs<Real>(port_data));
+        port_data.channel_count = channel_count;
+
+        for (uint32_t c_idx = 0; c_idx < channel_count; ++c_idx) {
+            bool have_channel = have_port && c_idx < (uint32_t)v3_port->num_channels;
+            uint32_t c_mapped = port.mapping.map_to_clap(c_idx);
+            //
+            Real *src = (!have_channel) ? nullptr : v3_buffer_ptrs<Real>(*v3_port)[c_idx];
+            Real *dst;
+            if (!src) have_channel = false;
+            //
+            if (!have_channel)
+                dst = (Real *)comp->m_zero_buffer.get();
             else {
-                port_data.data32 = allocator->typed_alloc<float *>(channel_count);
-                CT_ASSERT(port_data.data32);
+                dst = allocator->typed_alloc<Real>(nframes);
+                CT_ASSERT(dst);
+                std::memcpy(dst, src, nframes * sizeof(Real));
             }
-            port_data.channel_count = channel_count;
-
-            if (is_input) {
-                for (uint32_t c_idx = 0; c_idx < channel_count; ++c_idx) {
-                    bool have_channel = have_port && c_idx < (uint32_t)v3_port->num_channels;
-                    uint32_t c_mapped = port.mapping.map_to_clap(c_idx);
-                    //
-                    bool src64 = proc64;
-                    void *src = (!have_channel) ? nullptr :
-                        (src64 ? (void *)v3_port->channel_buffers_64[c_idx] : (void *)v3_port->channel_buffers_32[c_idx]);
-                    bool dst64 = port_data.data64 != nullptr;
-                    void **dst = dst64 ? (void **)&port_data.data64[c_mapped] : (void **)&port_data.data32[c_mapped];
-                    if (!src) have_channel = false;
-                    //
-                    if (have_channel && dst64) {
-                        double *buf = allocator->typed_alloc<double>(nframes);
-                        CT_ASSERT(buf);
-                        if (src64)
-                            std::copy_n((double *)src, nframes, buf);
-                        else
-                            std::copy_n((float *)src, nframes, buf);
-                        *dst = buf;
-                    }
-                    else if (have_channel && !dst64) {
-                        float *buf = allocator->typed_alloc<float>(nframes);
-                        CT_ASSERT(buf);
-                        if (src64)
-                            std::copy_n((double *)src, nframes, buf);
-                        else
-                            std::copy_n((float *)src, nframes, buf);
-                        *dst = buf;
-                    }
-                    else if (!have_channel) {
-                        *dst = dummy_buffer[is_input];
-                    }
-                    //
-                    bool silent = (!have_channel || nframes < 1) ? true :
-                        ((v3_port->channel_silence_bitset & ((uint64_t)1 << c_idx)) &&
-                         (src64 ? (*(double *)src == 0) : (*(float *)src == 0)));
-                    if (silent)
-                        port_data.constant_mask |= (uint64_t)1 << c_mapped;
-                }
-            }
-            else { // is output
-                for (uint32_t c_idx = 0; c_idx < channel_count; ++c_idx) {
-                    bool have_channel = have_port && c_idx < (uint32_t)v3_port->num_channels;
-                    uint32_t c_mapped = port.mapping.map_to_clap(c_idx);
-                    //
-                    bool src64 = proc64;
-                    void *src = (!have_channel) ? nullptr :
-                        (src64 ? (void *)v3_port->channel_buffers_64[c_idx] : (void *)v3_port->channel_buffers_32[c_idx]);
-                    bool dst64 = port_data.data64 != nullptr;
-                    void **dst = dst64 ? (void **)&port_data.data64[c_mapped] : (void **)&port_data.data32[c_mapped];
-                    if (!src) have_channel = false;
-                    //
-                    if (have_channel && src64 == dst64) {
-                        *dst = src;
-                    }
-                    else if (have_channel && src64) {
-                        double *buf = allocator->typed_alloc<double>(nframes);
-                        CT_ASSERT(buf);
-                        *dst = buf;
-                    }
-                    else if (have_channel && !src64) {
-                        float *buf = allocator->typed_alloc<float>(nframes);
-                        CT_ASSERT(buf);
-                        *dst = buf;
-                    }
-                    else if (!have_channel) {
-                        *dst = (double *)dummy_buffer[is_input];
-                    }
-                }
-            }
-
-            ios[is_input][p_idx] = port_data;
+            audio_buffer_ptrs<Real>(port_data)[c_mapped] = dst;
+            //
+            bool silent = !have_channel || nframes < 1 ||
+                ((v3_port->channel_silence_bitset & ((uint64_t)1 << c_idx)) && (src[0] == 0));
+            if (silent)
+                port_data.constant_mask |= (uint64_t)1 << c_mapped;
         }
+
+        inputs[p_idx] = port_data;
     }
 
     clap_data->audio_inputs = inputs;
-    clap_data->audio_outputs = outputs;
     clap_data->audio_inputs_count = num_inputs;
+
+    // outputs
+    uint32_t num_outputs = (uint32_t)audio_ports->m_outputs.size();
+    clap_audio_buffer *outputs = allocator->typed_alloc<clap_audio_buffer>(num_outputs);
+    CT_ASSERT(outputs);
+
+    for (uint32_t p_idx = 0; p_idx < num_outputs; ++p_idx) {
+        clap_audio_buffer port_data{};
+        const ct_clap_port_info &port = audio_ports->m_outputs[p_idx];
+        uint32_t channel_count = port.channel_count;
+
+        bool have_port = p_idx < (uint32_t)data->num_output_buses;
+        const v3_audio_bus_buffers *v3_port = (!have_port) ? nullptr : &data->outputs[p_idx];
+
+        audio_buffer_ptrs<Real>(port_data) = allocator->typed_alloc<Real *>(channel_count);
+        CT_ASSERT(audio_buffer_ptrs<Real>(port_data));
+        port_data.channel_count = channel_count;
+
+        for (uint32_t c_idx = 0; c_idx < channel_count; ++c_idx) {
+            bool have_channel = have_port && c_idx < (uint32_t)v3_port->num_channels;
+            uint32_t c_mapped = port.mapping.map_to_clap(c_idx);
+            //
+            Real *src = (!have_channel) ? nullptr : v3_buffer_ptrs<Real>(*v3_port)[c_idx];
+            Real *dst;
+            if (!src) have_channel = false;
+            //
+            if (!have_channel)
+                dst = (Real *)comp->m_trash_buffer.get();
+            else
+                dst = src;
+            audio_buffer_ptrs<Real>(port_data)[c_mapped] = dst;
+        }
+
+        outputs[p_idx] = port_data;
+    }
+
+    clap_data->audio_outputs = outputs;
     clap_data->audio_outputs_count = num_outputs;
 }
 
-static void process_release_buffers(ct_component *comp, v3_process_data *data, ct_bump_allocator *allocator, clap_process *clap_data)
+template <class Real>
+static void release_processing_buffers(ct_component *comp, v3_process_data *data, ct_bump_allocator *allocator, clap_process *clap_data)
 {
     // transfer output buffers back to v3
 
@@ -395,8 +363,8 @@ static void process_release_buffers(ct_component *comp, v3_process_data *data, c
     clap_audio_buffer *outputs = clap_data->audio_outputs;
 
     uint32_t nframes = (uint32_t)data->nframes;
-    bool proc64 = data->symbolic_sample_size == V3_SAMPLE_64;
 
+    // outputs
     for (uint32_t p_idx = 0; p_idx < num_outputs; ++p_idx) {
         const clap_audio_buffer &port_data = outputs[p_idx];
         const ct_clap_port_info &port = ports[p_idx];
@@ -411,32 +379,12 @@ static void process_release_buffers(ct_component *comp, v3_process_data *data, c
             bool have_channel = have_port && c_idx < (uint32_t)v3_port->num_channels;
             uint32_t c_mapped = port.mapping.map_to_clap(c_idx);
             //
-            bool dst64 = proc64;
-            void *dst = (!have_channel) ? nullptr :
-                (dst64 ? (void *)v3_port->channel_buffers_64[c_idx] : (void *)v3_port->channel_buffers_32[c_idx]);
-            bool src64 = port_data.data64 != nullptr;
-            void *src = src64 ? (void *)port_data.data64[c_mapped] : (void *)port_data.data32[c_mapped];
+            Real *dst = (!have_channel) ? nullptr : v3_buffer_ptrs<Real>(*v3_port)[c_idx];
+            //Real *src = audio_buffer_ptrs<Real>(port_data)[c_mapped];
             if (!dst) have_channel = false;
             //
-            if (src == dst) {
-                // nothing to transfer
-            }
-            else if (have_channel && dst64) {
-                if (src64)
-                    std::copy_n((double *)src, nframes, (double *)dst);
-                else
-                    std::copy_n((float *)src, nframes, (double *)dst);
-            }
-            else if (have_channel && !dst64) {
-                if (src64)
-                    std::copy_n((double *)src, nframes, (float *)dst);
-                else
-                    std::copy_n((float *)src, nframes, (float *)dst);
-            }
-            //
-            bool silent = (nframes < 1) ? true :
-                (port_data.constant_mask & ((uint64_t)1 << c_mapped)) &&
-                (src64 ? (*(double *)src == 0) : (*(float *)src == 0));
+            bool silent = !have_channel || nframes < 1 ||
+                ((port_data.constant_mask & ((uint64_t)1 << c_mapped)) && (dst[0] == 0));
             if (silent)
                 v3_port->channel_silence_bitset |= (uint64_t)1 << c_idx;
         }
@@ -502,11 +450,17 @@ v3_result V3_API ct_audio_processor::process(void *self_, v3_process_data *data)
     clap_data.steady_time = -1;
     clap_data.frames_count = (uint32_t)data->nframes;
     clap_data.transport = &comp->m_transport;
-    process_prepare_buffers(comp, data, &allocator, &clap_data);
+    if (data->symbolic_sample_size == V3_SAMPLE_64)
+        prepare_processing_buffers<double>(comp, data, &allocator, &clap_data);
+    else
+        prepare_processing_buffers<float>(comp, data, &allocator, &clap_data);
     clap_data.in_events = &clap_evts_in;
     clap_data.out_events = &clap_evts_out;
     clap_process_status clap_status = CLAP_CALL(plug, process, plug, &clap_data);
-    process_release_buffers(comp, data, &allocator, &clap_data);
+    if (data->symbolic_sample_size == V3_SAMPLE_64)
+        release_processing_buffers<double>(comp, data, &allocator, &clap_data);
+    else
+        release_processing_buffers<float>(comp, data, &allocator, &clap_data);
     process_parameters_after(self, data);
 
     LOG_PLUGIN_RET((clap_status == CLAP_PROCESS_ERROR) ? V3_FALSE : V3_TRUE);

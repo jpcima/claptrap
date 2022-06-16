@@ -42,7 +42,7 @@ struct ct_caches {
         std::vector<ct_clap_port_info> m_inputs;
         std::vector<ct_clap_port_info> m_outputs;
         uint32_t m_total_channels = 0;
-        uint32_t m_num_ports_supporting_64bit = 0;
+        bool m_can_do_64bit = false;
         const std::vector<ct_clap_port_info> &get_port_list(bool is_input) const;
     };
 
@@ -50,7 +50,7 @@ struct ct_caches {
         std::vector<ct_clap_port_info> m_inputs;
         std::vector<ct_clap_port_info> m_outputs;
         uint32_t m_total_channels = 0;
-        uint32_t m_num_ports_supporting_64bit = 0;
+        bool m_can_do_64bit = false;
         const std::vector<ct_clap_port_info> &get_port_list(bool is_input) const;
     };
 

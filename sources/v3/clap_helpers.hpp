@@ -34,3 +34,12 @@ struct ct_clap_port_info : public clap_audio_port_info_t {
 double normalize_parameter_value(const clap_param_info *info, double plain);
 // convert parameter to plain
 double denormalize_parameter_value(const clap_param_info *info, double normalized);
+
+// get the audio buffer pointers
+template <class T> T **&audio_buffer_ptrs(clap_audio_buffer &ab);
+template <> inline float **&audio_buffer_ptrs<float>(clap_audio_buffer &ab) { return ab.data32; }
+template <> inline double **&audio_buffer_ptrs<double>(clap_audio_buffer &ab) { return ab.data64; }
+
+template <class T> T **audio_buffer_ptrs(const clap_audio_buffer &ab);
+template <> inline float **audio_buffer_ptrs<float>(const clap_audio_buffer &ab) { return ab.data32; }
+template <> inline double **audio_buffer_ptrs<double>(const clap_audio_buffer &ab) { return ab.data64; }

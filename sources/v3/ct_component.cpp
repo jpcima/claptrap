@@ -397,7 +397,8 @@ static void allocate_buffers(ct_component *self, size_t buffer_size)
 
     // calculate the required amount of pointer-bump memory
     size_t dynamic_capacity = 0;
-    bool support_64bit[2] = {false, false};
+    bool can_do_64bit = audio_ports->m_can_do_64bit;
+    size_t float_size = can_do_64bit ? sizeof(double) : sizeof(float);
 
     auto pad_size = [](size_t size) -> size_t {
         constexpr size_t align = alignof(std::max_align_t);
@@ -407,17 +408,15 @@ static void allocate_buffers(ct_component *self, size_t buffer_size)
     for (bool is_input : {false, true}) {
         const std::vector<ct_clap_port_info> &ports = audio_ports->get_port_list(is_input);
         uint32_t num_ports = (uint32_t)ports.size();
+
         // the array of I/O structures
         dynamic_capacity += pad_size(num_ports * sizeof(clap_audio_buffer));
+
         for (uint32_t p_idx = 0; p_idx < num_ports; ++p_idx) {
             const ct_clap_port_info &port = ports[p_idx];
             // the channel buffer
-            if (port.flags & CLAP_AUDIO_PORT_SUPPORTS_64BITS) {
-                dynamic_capacity += port.channel_count * pad_size(buffer_size * sizeof(double));
-                support_64bit[is_input] = true;
-            }
-            else
-                dynamic_capacity += port.channel_count * pad_size(buffer_size * sizeof(float));
+            if (is_input)
+                dynamic_capacity += port.channel_count * pad_size(buffer_size * float_size);
             // the array of buffer pointers
             dynamic_capacity += pad_size(port.channel_count * sizeof(void *));
         }
@@ -426,8 +425,8 @@ static void allocate_buffers(ct_component *self, size_t buffer_size)
     // allocate
     self->m_dynamic_capacity = dynamic_capacity;
     self->m_dynamic_buffers = stdc_allocate<uint8_t>(dynamic_capacity);
-    self->m_zero_buffer = stdc_allocate<uint8_t>(buffer_size * (support_64bit[true] ? sizeof(double) : sizeof(float)));
-    self->m_trash_buffer = stdc_allocate<uint8_t>(buffer_size * (support_64bit[false] ? sizeof(double) : sizeof(float)));
+    self->m_zero_buffer = stdc_allocate<uint8_t>(buffer_size * float_size);
+    self->m_trash_buffer = stdc_allocate<uint8_t>(buffer_size * float_size);
 }
 
 static void deallocate_buffers(ct_component *self)

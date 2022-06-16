@@ -89,7 +89,7 @@ static void cache_audio_ports_internal(
     const clap_plugin *plug, const clap_plugin_audio_ports *audio_ports,
     const clap_plugin_surround *surround,
     bool is_input, std::vector<ct_clap_port_info> &result,
-    uint32_t *channel_counter, uint32_t *support_64bit_counter)
+    uint32_t *channel_counter, bool *can_do_64bit)
 {
     result.clear();
 
@@ -104,8 +104,9 @@ static void cache_audio_ports_internal(
         if (channel_counter)
             *channel_counter += info.channel_count;
 
-        if (support_64bit_counter && (info.flags & CLAP_AUDIO_PORT_SUPPORTS_64BITS))
-            *support_64bit_counter += 1;
+        uint32_t flags_do_64bit = CLAP_AUDIO_PORT_SUPPORTS_64BITS|CLAP_AUDIO_PORT_REQUIRES_COMMON_SAMPLE_SIZE;
+        if ((info.flags & flags_do_64bit) != flags_do_64bit)
+            *can_do_64bit = false;
 
         uint8_t channel_map_buf[ct_port_max_channels] = {};
         uint32_t channel_map_size = 0;
@@ -151,9 +152,9 @@ void ct_caches::impl::cache_audio_port_configs()
         }
 
         info.m_total_channels = 0;
-        info.m_num_ports_supporting_64bit = 0;
-        cache_audio_ports_internal(plug, comp->m_ext.m_audio_ports, comp->m_ext.m_surround, true, info.m_inputs, &info.m_total_channels, &info.m_num_ports_supporting_64bit);
-        cache_audio_ports_internal(plug, comp->m_ext.m_audio_ports, comp->m_ext.m_surround, false, info.m_outputs, &info.m_total_channels, &info.m_num_ports_supporting_64bit);
+        info.m_can_do_64bit = true;
+        cache_audio_ports_internal(plug, comp->m_ext.m_audio_ports, comp->m_ext.m_surround, true, info.m_inputs, &info.m_total_channels, &info.m_can_do_64bit);
+        cache_audio_ports_internal(plug, comp->m_ext.m_audio_ports, comp->m_ext.m_surround, false, info.m_outputs, &info.m_total_channels, &info.m_can_do_64bit);
 
         // check the information for consistency
         const uint32_t input_count = info.m_config.input_port_count;
@@ -229,9 +230,9 @@ void ct_caches::impl::cache_audio_ports(bool do_callback)
     CT_ASSERT(comp->m_ext.m_audio_ports);
 
     audio_ports->m_total_channels = 0;
-    audio_ports->m_num_ports_supporting_64bit = 0;
-    cache_audio_ports_internal(plug, comp->m_ext.m_audio_ports, comp->m_ext.m_surround, true, audio_ports->m_inputs, &audio_ports->m_total_channels, &audio_ports->m_num_ports_supporting_64bit);
-    cache_audio_ports_internal(plug, comp->m_ext.m_audio_ports, comp->m_ext.m_surround, false, audio_ports->m_outputs, &audio_ports->m_total_channels, &audio_ports->m_num_ports_supporting_64bit);
+    audio_ports->m_can_do_64bit = true;
+    cache_audio_ports_internal(plug, comp->m_ext.m_audio_ports, comp->m_ext.m_surround, true, audio_ports->m_inputs, &audio_ports->m_total_channels, &audio_ports->m_can_do_64bit);
+    cache_audio_ports_internal(plug, comp->m_ext.m_audio_ports, comp->m_ext.m_surround, false, audio_ports->m_outputs, &audio_ports->m_total_channels, &audio_ports->m_can_do_64bit);
 
     // check our active config, which requires valid mappings
     const uint32_t input_count = (uint32_t)audio_ports->m_inputs.size();
