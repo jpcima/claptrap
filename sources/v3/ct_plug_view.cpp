@@ -115,9 +115,23 @@ v3_result V3_API ct_plug_view::attached(void *self_, void *parent, const char *p
     if (!convert_to_clap_window(parent, platform_type, &window))
         LOG_PLUGIN_RET(V3_FALSE);
 
-    bool floating = !window_valid;
-    if (!CLAP_CALL(gui, create, plug, window.api, floating))
+    v3::plugin_frame *frame = self->m_frame;
+#if CT_X11
+    // ensure we have a frame and a runloop in X11
+    v3::run_loop *runloop = nullptr;
+    if (!frame || frame->m_vptr->i_unk.query_interface(frame, v3_run_loop_iid, (void **)&runloop) != V3_OK)
         LOG_PLUGIN_RET(V3_FALSE);
+#endif
+
+    if (self->m_set_frame_hook)
+        self->m_set_frame_hook(self, frame);
+
+    bool floating = !window_valid;
+    if (!CLAP_CALL(gui, create, plug, window.api, floating)) {
+        if (self->m_set_frame_hook)
+            self->m_set_frame_hook(self, nullptr);
+        LOG_PLUGIN_RET(V3_FALSE);
+    }
 
     if (!floating)
         CLAP_CALL(gui, set_parent, plug, &window);
@@ -143,6 +157,9 @@ v3_result V3_API ct_plug_view::removed(void *self_)
         LOG_PLUGIN_RET(V3_FALSE);
 
     CLAP_CALL(gui, destroy, plug);
+
+    if (self->m_set_frame_hook)
+        self->m_set_frame_hook(self, nullptr);
 
     self->m_created = false;
     LOG_PLUGIN_RET(V3_OK);
@@ -271,9 +288,6 @@ v3_result V3_API ct_plug_view::set_frame(void *self_, v3_plugin_frame **frame_)
             frame->m_vptr->i_unk.ref(frame);
         self->m_frame = frame;
     }
-
-    if (self->m_set_frame_hook)
-        self->m_set_frame_hook(self);
 
     LOG_PLUGIN_RET(V3_OK);
 }

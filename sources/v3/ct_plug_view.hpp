@@ -59,7 +59,7 @@ struct ct_plug_view {
     ct_component *m_comp = nullptr;
     bool m_created = false;
     void (*m_delete_hook)(ct_plug_view *) = nullptr;
-    void (*m_set_frame_hook)(ct_plug_view *) = nullptr;
+    void (*m_set_frame_hook)(ct_plug_view *, v3::plugin_frame *) = nullptr;
     v3::plugin_frame *m_frame = nullptr;
 
     // subobjects

@@ -316,15 +316,17 @@ v3_plugin_view **V3_API ct_edit_controller::create_view(void *self_, const char 
                 comp->m_editor = nullptr;
                 comp->m_editor_frame = nullptr;
             };
-            view->m_set_frame_hook = +[](ct_plug_view *self)
+            view->m_set_frame_hook = +[](ct_plug_view *self, v3::plugin_frame *frame)
             {
                 ct_component *comp = self->m_comp;
-                v3::plugin_frame *frame = self->m_frame;
                 comp->m_editor_frame = frame;
 #if CT_X11
                 v3::run_loop *runloop = nullptr;
-                if (!frame || frame->m_vptr->i_unk.query_interface(frame, v3_run_loop_iid, (void **)&runloop) != V3_OK)
-                    runloop = nullptr;
+                if (frame) {
+                    v3_result ret = frame->m_vptr->i_unk.query_interface(frame, v3_run_loop_iid, (void **)&runloop);
+                    CT_ASSERT(ret == V3_OK);
+                    (void)ret;
+                }
                 comp->set_run_loop(runloop);
 #endif
             };
