@@ -350,7 +350,7 @@ bool ct_host::timer_support__unregister_timer(const clap_host *host, clap_id slo
 
 //------------------------------------------------------------------------------
 #if CT_X11
-static void invoke_posix_fd_callback(ct_host::posix_fd_data *posix_fd_data, int fd, int flags)
+static void invoke_posix_fd_callback(ct_host::posix_fd_data *posix_fd_data, int fd, clap_posix_fd_flags_t flags)
 {
     ct_component *comp = (ct_component *)posix_fd_data->m_host->m_clap_host.host_data;
     const clap_plugin *plug = comp->m_plug;
@@ -360,7 +360,7 @@ static void invoke_posix_fd_callback(ct_host::posix_fd_data *posix_fd_data, int 
         CLAP_CALL(posix_fd_support, on_fd, plug, fd, flags);
 }
 
-bool ct_host::posix_fd__register_fd(const clap_host *host, int fd, int flags)
+bool ct_host::posix_fd__register_fd(const clap_host *host, int fd, clap_posix_fd_flags_t flags)
 {
     ct_component *comp = (ct_component *)host->host_data;
     ct_host *self = comp->m_host.get();
@@ -410,7 +410,7 @@ bool ct_host::posix_fd__register_fd(const clap_host *host, int fd, int flags)
     return true;
 }
 
-bool ct_host::posix_fd__modify_fd(const clap_host *host, int fd, int flags)
+bool ct_host::posix_fd__modify_fd(const clap_host *host, int fd, clap_posix_fd_flags_t flags)
 {
     (void)host;
     (void)fd;

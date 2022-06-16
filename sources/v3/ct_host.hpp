@@ -44,8 +44,8 @@ struct ct_host {
 
     //--------------------------------------------------------------------------
 #if CT_X11
-    static bool posix_fd__register_fd(const clap_host *host, int fd, int flags);
-    static bool posix_fd__modify_fd(const clap_host *host, int fd, int flags);
+    static bool posix_fd__register_fd(const clap_host *host, int fd, clap_posix_fd_flags_t flags);
+    static bool posix_fd__modify_fd(const clap_host *host, int fd, clap_posix_fd_flags_t flags);
     static bool posix_fd__unregister_fd(const clap_host *host, int fd);
 #endif
 

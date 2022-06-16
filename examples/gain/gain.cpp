@@ -438,7 +438,7 @@ static void install_vstgui_handlers(const clap_plugin *plugin)
 }
 
 //------------------------------------------------------------------------------
-static void gain__posix_fd_support_on_fd(const clap_plugin *plugin, int fd, int flags)
+static void gain__posix_fd_support_on_fd(const clap_plugin *plugin, int fd, clap_posix_fd_flags_t flags)
 {
     (void)flags;
 

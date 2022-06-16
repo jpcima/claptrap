@@ -345,8 +345,8 @@ void convert_v3_transport_to_clap(const v3_process_context *ctx, clap_event_tran
         }
 
         if (ctx->state & V3_PROCESS_CTX_TIME_SIG_VALID) {
-            transport->tsig_num = (int16_t)ctx->time_sig_numerator;
-            transport->tsig_denom = (int16_t)ctx->time_sig_denom;
+            transport->tsig_num = (uint16_t)ctx->time_sig_numerator;
+            transport->tsig_denom = (uint16_t)ctx->time_sig_denom;
             transport->flags |= CLAP_TRANSPORT_HAS_TIME_SIGNATURE;
         }
 

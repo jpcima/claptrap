@@ -16,7 +16,7 @@ ct_check_linker_options(CT_HAVE_LINKER_FLAG_NO_UNDEFINED "-Xlinker" "--no-undefi
 
 ###
 include(FetchContent)
-set(CT_CLAP_FETCH_VERSION "cf2bdb1380d97dcf6d69ba603c444b1981efcd3d")
+set(CT_CLAP_FETCH_VERSION "1.0.2")
 set(CT_FMT_FETCH_VERSION "8.1.1")
 set(CT_VSTGUI_FETCH_VERSION "bdc3b71b96c1356face2e18f044ad62eb60fecbf")
 
