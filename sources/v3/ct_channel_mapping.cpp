@@ -2,6 +2,8 @@
 #include <clap/clap.h>
 #include <algorithm>
 
+namespace ct {
+
 static constexpr uint64_t v3_speaker_mono = (uint64_t)1 << 19;
 
 bool ct_channel_remapper::configure(uint32_t nchan, nonstd::span<const uint8_t> channel_map)
@@ -110,3 +112,5 @@ static_assert(CLAP_SURROUND_TFR == 14);
 static_assert(CLAP_SURROUND_TBL == 15);
 static_assert(CLAP_SURROUND_TBC == 16);
 static_assert(CLAP_SURROUND_TBR == 17);
+
+} // namespace ct

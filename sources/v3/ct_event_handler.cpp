@@ -1,6 +1,8 @@
 #include "ct_event_handler.hpp"
 #include <cstring>
 
+namespace ct {
+
 const ct_event_handler::vtable ct_event_handler::s_vtable;
 
 v3_result V3_API ct_event_handler::query_interface(void *self_, const v3_tuid iid, void **obj)
@@ -57,3 +59,5 @@ void V3_API ct_event_handler::on_fd_is_set(void *self_, int fd)
     if (self->m_callback)
         self->m_callback(self->m_callback_data, fd);
 }
+
+} // namespace ct

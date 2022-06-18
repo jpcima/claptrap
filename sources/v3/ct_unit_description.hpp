@@ -7,6 +7,9 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+
+namespace ct {
+
 struct ct_component;
 
 // A subobject of `ct_component`
@@ -69,3 +72,5 @@ struct ct_unit_description {
     std::vector<std::unique_ptr<unit_info>> m_units;
     std::unordered_map<std::string_view, unit_info *> m_by_path;
 };
+
+} // namespace ct

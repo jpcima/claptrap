@@ -27,7 +27,7 @@ enum {
 // Helper to invoke CLAP function pointers safely
 // (allows to insert logging if desired)
 #define CLAP_CALL(self, member, ...) \
-    ::ct_safe_fnptr_access_call((self), +[](decltype(self) x) { return x->member; }, ##__VA_ARGS__)
+    ::ct::safe_fnptr_access_call((self), +[](decltype(self) x) { return x->member; }, ##__VA_ARGS__)
 
 // Enable to print trace messages
 #define VERBOSE_PLUGIN_CALLS 0
@@ -45,24 +45,24 @@ enum {
 #   define LOG_PLUGIN_RET_PTR(ret) return (ret)
 #else
 #   define LOG_PLUGIN_CALL                                              \
-    const size_t plugin_call__depth_v = plugin_call__depth();           \
+    const size_t plugin_call__depth_v = ct::plugin_call__depth();       \
     CT_LOG_PRINTF((plugin_call__depth_v > 0) ?                          \
                   CT_MESSAGE_PREFIX_SPACES : CT_MESSAGE_PREFIX);        \
     for (size_t i = 0; i < plugin_call__depth_v; ++i)                   \
         CT_LOG_PRINTF((i + 1 < plugin_call__depth_v) ? "   " : "+- ");  \
     CT_MESSAGE_NP("called {}", CT_FUNCSIG);                             \
-    plugin_call__enter();                                               \
-    auto plugin_call__guard = ct::defer([]() { plugin_call__leave(); })
+    ct::plugin_call__enter();                                           \
+    auto plugin_call__guard = ct::defer([]() { ct::plugin_call__leave(); })
 
 #   define LOG_PLUGIN_SELF_CALL(self)                                   \
-    const size_t plugin_call__depth_v = plugin_call__depth();           \
+    const size_t plugin_call__depth_v = ct::plugin_call__depth();       \
     CT_LOG_PRINTF((plugin_call__depth_v > 0) ?                          \
                   CT_MESSAGE_PREFIX_SPACES : CT_MESSAGE_PREFIX);        \
     for (size_t i = 0; i < plugin_call__depth_v; ++i)                   \
         CT_LOG_PRINTF((i + 1 < plugin_call__depth_v) ? "   " : "+- ");  \
     CT_MESSAGE_NP("called ({}) {}", (self), CT_FUNCSIG);                \
-    plugin_call__enter();                                               \
-    auto plugin_call__guard = ct::defer([]() { plugin_call__leave(); })
+    ct::plugin_call__enter();                                           \
+    auto plugin_call__guard = ct::defer([]() { ct::plugin_call__leave(); })
 
 #   define LOG_PLUGIN_RET(ret) do {                         \
         decltype((ret)) ret__value = (ret);                 \
@@ -82,7 +82,9 @@ enum {
         return ret__value;                                  \
     } while (0)
 
+namespace ct {
 void plugin_call__enter();
 void plugin_call__leave();
 size_t plugin_call__depth();
+} // namespace ct
 #endif

@@ -14,6 +14,8 @@
 #   include <CoreFoundation/CoreFoundation.h>
 #endif
 
+namespace ct {
+
 ct_host::ct_host(v3::object *hostcontext)
 {
     // fill in host info
@@ -22,7 +24,7 @@ ct_host::ct_host(v3::object *hostcontext)
         if (hostcontext && hostcontext->m_vptr->i_unk.query_interface(hostcontext, v3_host_application_iid, (void **)&app) == V3_OK) {
             v3_str_128 name16{};
             if (app->m_vptr->i_app.get_name(app, name16) == V3_OK) {
-                m_clap_host_name = ct::UTF_convert<char>(name16);
+                m_clap_host_name = UTF_convert<char>(name16);
                 m_clap_host.name = m_clap_host_name.c_str();
             }
         }
@@ -496,3 +498,5 @@ void ct_host::set_run_loop(v3::run_loop *runloop)
     m_runloop = runloop;
 }
 #endif
+
+} // namespace ct

@@ -2,6 +2,8 @@
 #include "travesty_helpers.hpp"
 #include <clap/clap.h>
 
+namespace ct {
+
 struct ct_istream {
     explicit ct_istream(v3::bstream *stream);
 
@@ -28,3 +30,5 @@ struct ct_ostream {
         &write,
     };
 };
+
+} // namespace ct

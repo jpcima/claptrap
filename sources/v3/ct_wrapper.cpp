@@ -39,7 +39,7 @@ extern "C" CT_EXPORT void *V3_API GetPluginFactory()
     if (!cf)
         LOG_PLUGIN_RET(nullptr);
 
-    static ct_plugin_factory instance{cf};
+    static ct::ct_plugin_factory instance{cf};
     LOG_PLUGIN_RET_PTR(&instance);
 }
 
@@ -55,7 +55,7 @@ extern "C" CT_EXPORT bool InitDll()
     if (GetModuleFileNameW(g_instance, (wchar_t *)path.get(), 32768) == 0)
         LOG_PLUGIN_RET(false);
 
-    if (!clap_entry.init(ct::UTF_convert<char>(path.get()).c_str()))
+    if (!clap_entry.init(UTF_convert<char>(path.get()).c_str()))
         LOG_PLUGIN_RET(false);
 
     g_module_initialized = true;

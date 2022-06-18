@@ -7,6 +7,9 @@
 #include <vector>
 #include <memory>
 #include <cstdint>
+
+namespace ct {
+
 struct ct_component;
 
 struct ct_caches {
@@ -64,3 +67,5 @@ struct ct_caches {
     struct impl;
     std::unique_ptr<impl> m_priv;
 };
+
+} // namespace ct

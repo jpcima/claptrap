@@ -3,6 +3,8 @@
 #include "ct_component.hpp"
 #include "utility/ct_assert.hpp"
 
+namespace ct {
+
 const ct_plug_view_content_scale::vtable ct_plug_view_content_scale::s_vtable;
 
 v3_result V3_API ct_plug_view_content_scale::query_interface(void *self_, const v3_tuid iid, void **obj)
@@ -49,3 +51,5 @@ v3_result V3_API ct_plug_view_content_scale::set_content_scale_factor(void *self
 
     LOG_PLUGIN_RET(V3_OK);
 }
+
+} // namespace ct

@@ -10,6 +10,8 @@
 #include <atomic>
 #include <memory>
 
+namespace ct {
+
 struct ct_audio_processor;
 struct ct_edit_controller;
 struct ct_unit_description;
@@ -148,3 +150,5 @@ struct ct_component {
     // caches
     std::unique_ptr<ct_caches> m_cache;
 };
+
+} // namespace ct

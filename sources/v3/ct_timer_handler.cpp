@@ -1,6 +1,8 @@
 #include "ct_timer_handler.hpp"
 #include <cstring>
 
+namespace ct {
+
 const ct_timer_handler::vtable ct_timer_handler::s_vtable;
 
 v3_result V3_API ct_timer_handler::query_interface(void *self_, const v3_tuid iid, void **obj)
@@ -57,3 +59,5 @@ void V3_API ct_timer_handler::on_timer(void *self_)
     if (self->m_callback)
         self->m_callback(self->m_callback_data);
 }
+
+} // namespace ct

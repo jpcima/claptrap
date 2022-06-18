@@ -41,17 +41,18 @@ template <class T>
 using fnptr_result_t = typename fnptr_result<T>::type;
 
 } // namespace detail
-} // namespace ct
 
 template <class Fn, class... Args>
-ct::detail::fnptr_result_t<Fn *> ct_safe_fnptr_call(Fn *fn, Args &&... args)
+ct::detail::fnptr_result_t<Fn *> safe_fnptr_call(Fn *fn, Args &&... args)
 {
     return ct::detail::safe_fnptr_invoker<Fn *>{fn}.invoke(std::forward<Args>(args)...);
 }
 
 template <class Self, class AccessFn, class... Args>
-inline auto ct_safe_fnptr_access_call(Self *self, AccessFn *access, Args &&... args)
+inline auto safe_fnptr_access_call(Self *self, AccessFn *access, Args &&... args)
 {
     CT_ASSERT(self);
-    return ct_safe_fnptr_call(access(self), std::forward<Args>(args)...);
+    return safe_fnptr_call(access(self), std::forward<Args>(args)...);
 }
+
+} // namespace ct

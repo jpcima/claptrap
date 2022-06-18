@@ -5,6 +5,8 @@
 #include <travesty/events.h>
 #include <cstdlib>
 
+namespace ct {
+
 event_converter_v3_to_clap::event_converter_v3_to_clap(ct_component *comp)
     : m_cache{comp->m_cache->get_params()}
 {
@@ -359,3 +361,5 @@ void convert_v3_transport_to_clap(const v3_process_context *ctx, clap_event_tran
 #endif
         }
 }
+
+} // namespace ct

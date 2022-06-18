@@ -3,6 +3,8 @@
 #include "utility/ct_assert.hpp"
 #include "utility/ct_messages.hpp"
 
+namespace ct {
+
 struct ct_caches::impl {
     ct_caches *m_self = nullptr;
     ct_component *m_comp = nullptr;
@@ -206,7 +208,7 @@ void ct_caches::impl::cache_audio_port_configs()
     }
 
     m_dirty_flags &= ~cache_flags_audio_ports_config;
-    ct_safe_fnptr_call(
+    ct::safe_fnptr_call(
         m_self->on_cache_update, m_self->m_callback_data,
         cache_flags_audio_ports_config|other_callback_flags);
 }
@@ -248,7 +250,7 @@ void ct_caches::impl::cache_audio_ports(bool do_callback)
 
     m_dirty_flags &= ~cache_flags_audio_ports;
     if (do_callback)
-        ct_safe_fnptr_call(m_self->on_cache_update, m_self->m_callback_data, cache_flags_audio_ports);
+        ct::safe_fnptr_call(m_self->on_cache_update, m_self->m_callback_data, cache_flags_audio_ports);
 }
 
 void ct_caches::impl::cache_params()
@@ -289,5 +291,7 @@ void ct_caches::impl::cache_params()
     }
 
     m_dirty_flags &= ~cache_flags_params;
-    ct_safe_fnptr_call(m_self->on_cache_update, m_self->m_callback_data, cache_flags_params);
+    ct::safe_fnptr_call(m_self->on_cache_update, m_self->m_callback_data, cache_flags_params);
 }
+
+} // namespace ct

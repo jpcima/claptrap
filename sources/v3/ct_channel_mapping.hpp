@@ -3,6 +3,8 @@
 #include <nonstd/span.hpp>
 #include <cstdint>
 
+namespace ct {
+
 class ct_channel_remapper {
 public:
     bool configure(uint32_t nchan, nonstd::span<const uint8_t> channel_map);
@@ -32,3 +34,5 @@ private:
     uint8_t m_map_v3_to_clap[ct_port_max_channels] = {};
     uint8_t m_map_clap_to_v3[ct_port_max_channels] = {};
 };
+
+} // namespace ct

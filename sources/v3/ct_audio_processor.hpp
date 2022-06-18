@@ -3,6 +3,9 @@
 #include "travesty_helpers.hpp"
 #include <travesty/component.h>
 #include <travesty/audio_processor.h>
+
+namespace ct {
+
 struct ct_component;
 
 // A subobject of `ct_component`
@@ -47,3 +50,5 @@ struct ct_audio_processor {
     const vtable *m_vptr = &s_vtable;
     ct_component *m_comp = nullptr;
 };
+
+} // namespace ct

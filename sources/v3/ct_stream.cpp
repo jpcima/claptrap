@@ -1,5 +1,7 @@
 #include "ct_stream.hpp"
 
+namespace ct {
+
 ct_istream::ct_istream(v3::bstream *stream)
 {
     m_istream.ctx = stream;
@@ -38,3 +40,5 @@ int64_t ct_ostream::write(const clap_ostream *stream, const void *buffer, uint64
 
     return count;
 }
+
+} // namespace ct

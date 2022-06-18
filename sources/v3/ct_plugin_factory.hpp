@@ -5,6 +5,8 @@
 #include <clap/clap.h>
 #include <string>
 
+namespace ct {
+
 struct ct_plugin_factory {
     explicit ct_plugin_factory(const clap_plugin_factory *cf);
     ~ct_plugin_factory();
@@ -54,3 +56,5 @@ struct ct_plugin_factory {
     const clap_plugin_factory *m_factory = nullptr;
     v3::object *m_hostcontext = nullptr;
 };
+
+} // namespace ct

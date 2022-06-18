@@ -4,6 +4,8 @@
 #include <travesty/view.h>
 #include <atomic>
 
+namespace ct {
+
 struct ct_timer_handler {
     ct_timer_handler() = default;
 
@@ -33,3 +35,5 @@ struct ct_timer_handler {
     void (*m_callback)(void *) = nullptr;
     void *m_callback_data;
 };
+
+} // namespace ct

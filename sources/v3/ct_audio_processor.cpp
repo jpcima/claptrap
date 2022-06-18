@@ -9,6 +9,8 @@
 #include "utility/ct_assert.hpp"
 #include <cstring>
 
+namespace ct {
+
 const ct_audio_processor::vtable ct_audio_processor::s_vtable;
 
 v3_result V3_API ct_audio_processor::query_interface(void *self_, const v3_tuid iid, void **obj)
@@ -481,3 +483,5 @@ uint32_t V3_API ct_audio_processor::get_tail_samples(void *self_)
 
     LOG_PLUGIN_RET(count);
 }
+
+} // namespace ct

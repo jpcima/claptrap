@@ -3,9 +3,13 @@
 #include "travesty_helpers.hpp"
 #include <vector>
 #include <cstdint>
+
+struct clap_event_transport;
+
+namespace ct {
+
 struct ct_component;
 class ct_events_buffer;
-struct clap_event_transport;
 
 //------------------------------------------------------------------------------
 class event_converter_v3_to_clap {
@@ -47,3 +51,5 @@ private:
 
 //------------------------------------------------------------------------------
 void convert_v3_transport_to_clap(const v3_process_context *ctx, clap_event_transport *transport);
+
+} // namespace ct

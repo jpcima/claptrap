@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cstring>
 
+namespace ct {
+
 const ct_edit_controller::vtable ct_edit_controller::s_vtable;
 
 v3_result V3_API ct_edit_controller::query_interface(void *self_, const v3_tuid iid, void **obj)
@@ -129,7 +131,7 @@ v3_result V3_API ct_edit_controller::get_parameter_info(void *self_, int32_t par
     info->flags |= (cf & CLAP_PARAM_IS_BYPASS) ? V3_PARAM_IS_BYPASS : 0;
 
     info->param_id = id;
-    ct::UTF_copy(info->title, ci.name);
+    UTF_copy(info->title, ci.name);
     info->short_title[0] = 0;
     info->units[0] = 0;
     if (cf & CLAP_PARAM_IS_STEPPED) {
@@ -164,7 +166,7 @@ v3_result V3_API ct_edit_controller::get_parameter_string_for_value(void *self_,
         LOG_PLUGIN_RET(V3_FALSE);
 
     nonstd::span<int16_t> output{output_, 128};
-    ct::UTF_copy(output, display);
+    UTF_copy(output, display);
 
     LOG_PLUGIN_RET(V3_OK);
 }
@@ -182,7 +184,7 @@ v3_result V3_API ct_edit_controller::get_parameter_value_for_string(void *self_,
         LOG_PLUGIN_RET(V3_FALSE);
 
     char display[256] = {};
-    ct::UTF_copy(display, input);
+    UTF_copy(display, input);
 
     double plain = {};
     if (!CLAP_CALL(params, text_to_value, plug, id, display, &plain))
@@ -342,3 +344,5 @@ v3_plugin_view **V3_API ct_edit_controller::create_view(void *self_, const char 
 
     LOG_PLUGIN_RET_PTR((v3_plugin_view **)view);
 }
+
+} // namespace ct

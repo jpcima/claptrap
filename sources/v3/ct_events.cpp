@@ -3,6 +3,8 @@
 #include <heapsort.hpp>
 #include <cstring>
 
+namespace ct {
+
 ct_events_buffer::ct_events_buffer(uint32_t capacity)
 {
     constexpr uint32_t alignval = alignof(clap_event_header);
@@ -86,3 +88,5 @@ clap_output_events ct_events_buffer::as_clap_output() noexcept
     clap_output_events oe{this, +try_push};
     return oe;
 }
+
+} // namespace ct

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cstring>
 
+namespace ct {
+
 const ct_plug_view::vtable ct_plug_view::s_vtable;
 
 ct_plug_view::ct_plug_view()
@@ -337,3 +339,5 @@ v3_result V3_API ct_plug_view::check_size_constraint(void *self_, v3_view_rect *
 
     LOG_PLUGIN_RET(V3_OK);
 }
+
+} // namespace ct

@@ -19,6 +19,8 @@
             (__VA_ARGS__ *)CT_ALLOCA(count * sizeof(__VA_ARGS__)), (count)})
 
 //------------------------------------------------------------------------------
+namespace ct {
+
 class stdc_delete {
 public:
     void operator()(void *x) const noexcept { std::free(x); }
@@ -44,3 +46,5 @@ stdc_ptr<T[]> stdc_allocate(std::size_t count)
         throw std::bad_alloc{};
     return stdc_ptr<T[]>{p};
 }
+
+} // namespace ct

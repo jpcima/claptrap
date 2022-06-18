@@ -4,6 +4,8 @@
 #include <travesty/view.h>
 #include <atomic>
 
+namespace ct {
+
 struct ct_event_handler {
     ct_event_handler() = default;
 
@@ -33,3 +35,5 @@ struct ct_event_handler {
     void (*m_callback)(void *, int) = nullptr;
     void *m_callback_data;
 };
+
+} // namespace ct

@@ -3,6 +3,8 @@
 #include <memory>
 #include <cstdint>
 
+namespace ct {
+
 class ct_events_buffer {
 public:
     explicit ct_events_buffer(uint32_t capacity);
@@ -23,3 +25,5 @@ private:
     std::unique_ptr<uint32_t[]> m_ind;
     uint32_t m_count = 0;
 };
+
+} // namespace ct

@@ -1,6 +1,9 @@
 #pragma once
 #include "ct_defs.hpp"
 #include "travesty_helpers.hpp"
+
+namespace ct {
+
 struct ct_component;
 
 // A subobject of `ct_component`
@@ -31,3 +34,5 @@ struct ct_process_context_requirements {
     const vtable *m_vptr = &s_vtable;
     ct_component *m_comp = nullptr;
 };
+
+} // namespace ct

@@ -2,6 +2,8 @@
 #include "ct_component.hpp"
 #include "utility/unicode_helpers.hpp"
 
+namespace ct {
+
 const ct_unit_description::vtable ct_unit_description::s_vtable;
 
 ct_unit_description::ct_unit_description()
@@ -50,7 +52,7 @@ uint32_t ct_unit_description::get_or_create_module_unit(std::string_view module)
             m_units.emplace_back(unit);
             unit->info.id = unit_id;
             unit->info.parent_unit_id = parent_id;
-            ct::UTF_copy(unit->info.name, name);
+            UTF_copy(unit->info.name, name);
             unit->info.program_list_id = -1;
             unit->path.assign(path);
 
@@ -231,3 +233,5 @@ v3_result V3_API ct_unit_description::set_unit_program_data(void *self_, int32_t
 
     LOG_PLUGIN_RET(V3_FALSE);
 }
+
+} // namespace ct

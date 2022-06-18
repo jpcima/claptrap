@@ -1,6 +1,8 @@
 #include "ct_process_context_requirements.hpp"
 #include "ct_component.hpp"
 
+namespace ct {
+
 const ct_process_context_requirements::vtable ct_process_context_requirements::s_vtable;
 
 v3_result V3_API ct_process_context_requirements::query_interface(void *self_, const v3_tuid iid, void **obj)
@@ -52,3 +54,5 @@ uint32_t V3_API ct_process_context_requirements::get_process_context_requirement
 
     LOG_PLUGIN_RET(req);
 }
+
+} // namespace ct

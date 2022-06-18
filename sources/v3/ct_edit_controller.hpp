@@ -3,6 +3,9 @@
 #include "travesty_helpers.hpp"
 #include <travesty/component.h>
 #include <travesty/edit_controller.h>
+
+namespace ct {
+
 struct ct_component;
 
 // A subobject of `ct_component`
@@ -65,3 +68,5 @@ struct ct_edit_controller {
     const vtable *m_vptr = &s_vtable;
     ct_component *m_comp = nullptr;
 };
+
+} // namespace ct

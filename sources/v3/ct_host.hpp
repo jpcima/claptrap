@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 
+namespace ct {
+
 struct ct_component;
 struct ct_event_handler;
 struct ct_timer_handler;
@@ -146,3 +148,5 @@ struct ct_host {
     v3::run_loop *m_runloop = nullptr;
 #endif
 };
+
+} // namespace ct

@@ -4,6 +4,9 @@
 #include <travesty/view.h>
 #include <memory>
 #include <atomic>
+
+namespace ct {
+
 struct ct_component;
 struct ct_plug_view_content_scale;
 
@@ -65,3 +68,5 @@ struct ct_plug_view {
     // subobjects
     std::unique_ptr<ct_plug_view_content_scale> m_content_scale;
 };
+
+} // namespace ct

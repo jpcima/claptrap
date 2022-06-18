@@ -7,6 +7,8 @@
 #include <string>
 #include <cstdint>
 
+namespace ct {
+
 // convert plugin features to VST3 categories
 std::string convert_categories_from_clap(const char *const *features);
 
@@ -43,3 +45,5 @@ template <> inline double **&audio_buffer_ptrs<double>(clap_audio_buffer &ab) { 
 template <class T> T **audio_buffer_ptrs(const clap_audio_buffer &ab);
 template <> inline float **audio_buffer_ptrs<float>(const clap_audio_buffer &ab) { return ab.data32; }
 template <> inline double **audio_buffer_ptrs<double>(const clap_audio_buffer &ab) { return ab.data64; }
+
+} // namespace ct

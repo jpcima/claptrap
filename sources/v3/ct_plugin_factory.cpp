@@ -8,6 +8,8 @@
 #include <memory>
 #include <cstring>
 
+namespace ct {
+
 const ct_plugin_factory::vtable ct_plugin_factory::s_vtable;
 
 ct_plugin_factory::ct_plugin_factory(const clap_plugin_factory *cf)
@@ -73,8 +75,8 @@ v3_result V3_API ct_plugin_factory::get_factory_info(void *self_, v3_factory_inf
     if (!desc0)
         LOG_PLUGIN_RET(V3_FALSE);
 
-    ct::UTF_copy(info->vendor, desc0->vendor);
-    ct::UTF_copy(info->url, desc0->url);
+    UTF_copy(info->vendor, desc0->vendor);
+    UTF_copy(info->url, desc0->url);
 
     std::string_view support_url{desc0->support_url};
     if (support_url.substr(0, 7) == "mailto:") {
@@ -82,7 +84,7 @@ v3_result V3_API ct_plugin_factory::get_factory_info(void *self_, v3_factory_inf
         std::size_t pos = support_email.find('?');
         if (pos != support_email.npos)
             support_email = support_email.substr(0, pos);
-        ct::UTF_copy(info->email, ct::URL_decode(support_email));
+        UTF_copy(info->email, URL_decode(support_email));
     }
     else {
         info->email[0] = 0;
@@ -114,8 +116,8 @@ v3_result V3_API ct_plugin_factory::get_class_info(void *self_, int32_t idx, v3_
 
     std::memcpy(info->class_id, info2.class_id, sizeof(v3_tuid));
     info->cardinality = info2.cardinality;
-    ct::UTF_copy(info->category, info2.category);
-    ct::UTF_copy(info->name, info2.name);
+    UTF_copy(info->category, info2.category);
+    UTF_copy(info->name, info2.name);
 
     LOG_PLUGIN_RET(V3_OK);
 }
@@ -166,13 +168,13 @@ v3_result V3_API ct_plugin_factory::get_class_info_2(void *self_, int32_t idx, v
 
     std::memcpy(&info->class_id, &info3.class_id, sizeof(v3_tuid));
     info->cardinality = info3.cardinality;
-    ct::UTF_copy(info->category, info3.category);
-    ct::UTF_copy(info->name, info3.name);
+    UTF_copy(info->category, info3.category);
+    UTF_copy(info->name, info3.name);
     info->class_flags = info3.class_flags;
-    ct::UTF_copy(info->sub_categories, info3.sub_categories);
-    ct::UTF_copy(info->vendor, info3.vendor);
-    ct::UTF_copy(info->version, info3.version);
-    ct::UTF_copy(info->sdk_version, info3.sdk_version);
+    UTF_copy(info->sub_categories, info3.sub_categories);
+    UTF_copy(info->vendor, info3.vendor);
+    UTF_copy(info->version, info3.version);
+    UTF_copy(info->sdk_version, info3.sdk_version);
 
     LOG_PLUGIN_RET(V3_OK);
 }
@@ -190,13 +192,13 @@ v3_result V3_API ct_plugin_factory::get_class_info_utf16(void *self_, int32_t id
 
     ct::generate_uuid(info->class_id, v3_wrapper_namespace_uuid, desc->id);
     info->cardinality = 0x7fffffff; // many instances
-    ct::UTF_copy(info->category, "Audio Module Class");
-    ct::UTF_copy(info->name, desc->name);
+    UTF_copy(info->category, "Audio Module Class");
+    UTF_copy(info->name, desc->name);
     info->class_flags = 0;
-    ct::UTF_copy(info->sub_categories, convert_categories_from_clap(desc->features));
-    ct::UTF_copy(info->vendor, desc->vendor);
-    ct::UTF_copy(info->version, desc->version);
-    ct::UTF_copy(info->sdk_version, "Travesty 3.7.4");
+    UTF_copy(info->sub_categories, convert_categories_from_clap(desc->features));
+    UTF_copy(info->vendor, desc->vendor);
+    UTF_copy(info->version, desc->version);
+    UTF_copy(info->sdk_version, "Travesty 3.7.4");
 
     LOG_PLUGIN_RET(V3_OK);
 }
@@ -219,3 +221,5 @@ v3_result V3_API ct_plugin_factory::set_host_context(void *self_, v3_funknown **
 
     LOG_PLUGIN_RET(V3_OK);
 }
+
+} // namespace ct

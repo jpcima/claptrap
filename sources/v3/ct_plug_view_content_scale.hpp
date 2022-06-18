@@ -1,6 +1,9 @@
 #pragma once
 #include "ct_defs.hpp"
 #include <travesty/view.h>
+
+namespace ct {
+
 struct ct_plug_view;
 
 // A subobject of `ct_plug_view`
@@ -31,3 +34,5 @@ struct ct_plug_view_content_scale {
     const vtable *m_vptr = &s_vtable;
     ct_plug_view *m_view = nullptr;
 };
+
+} // namespace ct

@@ -6,6 +6,8 @@
 #include <array>
 #include <cstring>
 
+namespace ct {
+
 std::string convert_categories_from_clap(const char *const *features)
 {
     std::set<std::string_view> cats;
@@ -196,3 +198,5 @@ double denormalize_parameter_value(const clap_param_info *info, double normalize
 
     return ret;
 }
+
+} // namespace ct
