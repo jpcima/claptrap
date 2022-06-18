@@ -1,9 +1,10 @@
 # -*- cmake -*-
 
-###
+include(FetchContent)
 include(CheckCSourceCompiles)
 include(CheckCXXSourceCompiles)
 
+###
 function(ct_check_linker_options VAR)
   set(CMAKE_REQUIRED_LINK_OPTIONS ${ARGN})
   if(MSVC)
@@ -15,10 +16,8 @@ endfunction()
 ct_check_linker_options(CT_HAVE_LINKER_FLAG_NO_UNDEFINED "-Xlinker" "--no-undefined")
 
 ###
-include(FetchContent)
 set(CT_CLAP_FETCH_VERSION "1.0.2")
 set(CT_FMT_FETCH_VERSION "8.1.1")
-set(CT_VSTGUI_FETCH_VERSION "bdc3b71b96c1356face2e18f044ad62eb60fecbf")
 
 FetchContent_Declare(clap
   GIT_REPOSITORY "https://github.com/free-audio/clap.git"
@@ -27,10 +26,6 @@ FetchContent_Declare(clap
 FetchContent_Declare(fmt
   GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
   GIT_TAG "${CT_FMT_FETCH_VERSION}")
-
-FetchContent_Declare(vstgui
-  GIT_REPOSITORY "https://github.com/steinbergmedia/vstgui.git"
-  GIT_TAG "${CT_VSTGUI_FETCH_VERSION}")
 
 ###
 add_library(ct-clap INTERFACE)
@@ -45,29 +40,6 @@ else()
   endif()
   message(STATUS "Fetched CLAP headers: ${clap_SOURCE_DIR}/include")
   target_include_directories(ct-clap INTERFACE "${clap_SOURCE_DIR}/include")
-endif()
-
-###
-add_library(ct-travesty INTERFACE)
-target_include_directories(ct-travesty INTERFACE "thirdparty/travesty/include")
-
-###
-add_library(ct-spin-mutex STATIC EXCLUDE_FROM_ALL "thirdparty/spin_mutex/src/spin_mutex.cpp")
-target_include_directories(ct-spin-mutex PUBLIC "thirdparty/spin_mutex/src")
-
-### dependencies below are for examples only
-if(NOT CT_EXAMPLES)
-  return()
-endif()
-
-###
-find_package(PkgConfig)
-
-###
-add_library(ct-dl INTERFACE)
-find_library(CT_DL_LIBRARY "dl")
-if(CT_DL_LIBRARY)
-  target_link_libraries(ct-dl INTERFACE "${CT_DL_LIBRARY}")
 endif()
 
 ###
@@ -88,234 +60,5 @@ target_compile_definitions(ct-fmt
   PRIVATE "fmt=FMT_NAMESPACE")
 
 ###
-# Find macOS system libraries
-if(APPLE)
-  find_library(CT_APPLE_COREFOUNDATION_LIBRARY "CoreFoundation")
-  find_library(CT_APPLE_FOUNDATION_LIBRARY "Foundation")
-  find_library(CT_APPLE_COCOA_LIBRARY "Cocoa")
-  find_library(CT_APPLE_CARBON_LIBRARY "Carbon")
-  find_library(CT_APPLE_OPENGL_LIBRARY "OpenGL")
-  find_library(CT_APPLE_ACCELERATE_LIBRARY "Accelerate")
-  find_library(CT_APPLE_QUARTZCORE_LIBRARY "QuartzCore")
-  find_library(CT_APPLE_AUDIOTOOLBOX_LIBRARY "AudioToolbox")
-  find_library(CT_APPLE_AUDIOUNIT_LIBRARY "AudioUnit")
-  find_library(CT_APPLE_COREAUDIO_LIBRARY "CoreAudio")
-  find_library(CT_APPLE_COREMIDI_LIBRARY "CoreMIDI")
-endif()
-
-###
-message(STATUS "Fetching VSTGUI: version ${CT_VSTGUI_FETCH_VERSION}")
-FetchContent_GetProperties(vstgui)
-if(NOT vstgui_POPULATED)
-  FetchContent_Populate(vstgui)
-endif()
-message(STATUS "Fetched VSTGUI: ${vstgui_SOURCE_DIR}")
-
-add_library(ct-vstgui STATIC EXCLUDE_FROM_ALL
-  "${vstgui_SOURCE_DIR}/vstgui/lib/animation/animations.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/animation/animator.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/animation/timingfunctions.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cautoanimation.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cbuttons.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/ccolorchooser.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/ccontrol.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cfontchooser.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cknob.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/clistcontrol.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cmoviebitmap.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cmoviebutton.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/coptionmenu.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cparamdisplay.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cscrollbar.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/csearchtextedit.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/csegmentbutton.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cslider.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cspecialdigit.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/csplashscreen.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cstringlist.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cswitch.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/ctextedit.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/ctextlabel.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cvumeter.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/controls/cxypad.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/platform/common/fileresourceinputstream.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/platform/common/genericoptionmenu.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/platform/common/generictextedit.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/platform/platformfactory.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cbitmap.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cbitmapfilter.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cclipboard.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/ccolor.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cdatabrowser.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cdrawcontext.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cdrawmethods.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cdropsource.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cfileselector.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cfont.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cframe.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cgradient.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cgradientview.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cgraphicspath.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/clayeredviewcontainer.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/clinestyle.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/coffscreencontext.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/copenglview.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cpoint.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/crect.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/crowcolumnview.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cscrollview.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cshadowviewcontainer.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/csplitview.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cstring.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/ctabview.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/ctooltipsupport.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cviewcontainer.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cview.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/cvstguitimer.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/events.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/genericstringlistdatabrowsersource.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/pixelbuffer.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/vstguidebug.cpp"
-  "${vstgui_SOURCE_DIR}/vstgui/lib/vstguiinit.cpp")
-
-if(WIN32)
-  target_sources(ct-vstgui PRIVATE
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/direct2d/d2dbitmapcache.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/direct2d/d2dbitmap.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/direct2d/d2ddrawcontext.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/direct2d/d2dfont.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/direct2d/d2dgradient.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/direct2d/d2dgraphicspath.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32datapackage.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32directcomposition.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32dragging.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32factory.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32frame.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32openglview.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32optionmenu.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32resourcestream.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32support.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32textedit.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/win32viewlayer.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/winfileselector.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/winstring.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/win32/wintimer.cpp")
-elseif(APPLE)
-  target_sources(ct-vstgui PRIVATE
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cocoa/autoreleasepool.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cocoa/cocoahelpers.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cocoa/cocoaopenglview.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cocoa/cocoatextedit.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cocoa/nsviewdraggingsession.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cocoa/nsviewframe.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cocoa/nsviewoptionmenu.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/caviewlayer.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cfontmac.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cgbitmap.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/cgdrawcontext.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/macclipboard.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/macfactory.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/macfileselector.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/macglobals.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/macstring.mm"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/mactimer.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/mac/quartzgraphicspath.cpp")
-else()
-  target_sources(ct-vstgui PRIVATE
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/cairobitmap.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/cairocontext.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/cairofont.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/cairogradient.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/cairopath.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/linuxfactory.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/linuxstring.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/x11dragging.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/x11fileselector.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/x11frame.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/x11platform.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/x11timer.cpp"
-    "${vstgui_SOURCE_DIR}/vstgui/lib/platform/linux/x11utils.cpp")
-endif()
-
-if(NOT MSVC)
-  target_compile_options(ct-vstgui PRIVATE "-Wno-multichar")
-endif()
-
-target_include_directories(ct-vstgui PUBLIC "${vstgui_SOURCE_DIR}")
-target_link_libraries(ct-vstgui PRIVATE ct-dl)
-
-if(WIN32)
-  if(NOT MSVC)
-    # autolinked on MSVC with pragmas
-    target_link_libraries(ct-vstgui PRIVATE
-      "opengl32"
-      "d2d1"
-      "dwrite"
-      "dwmapi"
-      "windowscodecs"
-      "shlwapi")
-  endif()
-elseif(APPLE)
-  target_link_libraries(ct-vstgui PRIVATE
-    "${CT_APPLE_COREFOUNDATION_LIBRARY}"
-    "${CT_APPLE_FOUNDATION_LIBRARY}"
-    "${CT_APPLE_COCOA_LIBRARY}"
-    "${CT_APPLE_OPENGL_LIBRARY}"
-    "${CT_APPLE_ACCELERATE_LIBRARY}"
-    "${CT_APPLE_QUARTZCORE_LIBRARY}"
-    "${CT_APPLE_CARBON_LIBRARY}"
-    "${CT_APPLE_AUDIOTOOLBOX_LIBRARY}"
-    "${CT_APPLE_COREAUDIO_LIBRARY}"
-    "${CT_APPLE_COREMIDI_LIBRARY}")
-else()
-  find_package(Freetype REQUIRED)
-  pkg_check_modules(ct-libxcb REQUIRED "xcb" IMPORTED_TARGET)
-  pkg_check_modules(ct-libxcb-util REQUIRED "xcb-util" IMPORTED_TARGET)
-  pkg_check_modules(ct-libxcb-cursor REQUIRED "xcb-cursor" IMPORTED_TARGET)
-  pkg_check_modules(ct-libxcb-keysyms REQUIRED "xcb-keysyms" IMPORTED_TARGET)
-  pkg_check_modules(ct-libxcb-xkb REQUIRED "xcb-xkb" IMPORTED_TARGET)
-  pkg_check_modules(ct-libxkb-common REQUIRED "xkbcommon" IMPORTED_TARGET)
-  pkg_check_modules(ct-libxkb-common-x11 REQUIRED "xkbcommon-x11" IMPORTED_TARGET)
-  pkg_check_modules(ct-cairo REQUIRED "cairo" IMPORTED_TARGET)
-  pkg_check_modules(ct-pango REQUIRED "pangocairo pangoft2" IMPORTED_TARGET)
-  pkg_check_modules(ct-fontconfig REQUIRED "fontconfig" IMPORTED_TARGET)
-  pkg_check_modules(ct-glib REQUIRED "glib-2.0" IMPORTED_TARGET)
-  target_link_libraries(ct-vstgui PRIVATE
-    Freetype::Freetype
-    PkgConfig::ct-libxcb
-    PkgConfig::ct-libxcb-util
-    PkgConfig::ct-libxcb-cursor
-    PkgConfig::ct-libxcb-keysyms
-    PkgConfig::ct-libxcb-xkb
-    PkgConfig::ct-libxkb-common
-    PkgConfig::ct-libxkb-common-x11
-    PkgConfig::ct-cairo
-    PkgConfig::ct-pango
-    PkgConfig::ct-fontconfig
-    PkgConfig::ct-glib)
-endif()
-
-if(CT_LIVE_EDITING)
-  target_compile_definitions(ct-vstgui PUBLIC "VSTGUI_LIVE_EDITING")
-endif()
-
-if(CMAKE_BUILD_TYPE MATCHES "Rel.*")
-  target_compile_definitions(ct-vstgui PUBLIC "RELEASE")
-else()
-  target_compile_definitions(ct-vstgui PUBLIC "DEVELOPMENT")
-endif()
-
-if(WIN32)
-  # Set Windows 10 as target version
-  target_compile_definitions(ct-vstgui PRIVATE "WINVER=0x0A00" "_WIN32_WINNT=0x0A00")
-  # Windows 10 RS2 DDI for custom fonts
-  target_compile_definitions(ct-vstgui PRIVATE "NTDDI_VERSION=0x0A000003")
-endif()
-
-add_library(ct-uidescription STATIC EXCLUDE_FROM_ALL
-  "${vstgui_SOURCE_DIR}/vstgui/vstgui_uidescription.cpp")
-target_link_libraries(ct-uidescription PUBLIC ct-vstgui)
-
-if(NOT MSVC)
-  target_compile_options(ct-uidescription PRIVATE "-Wno-multichar")
-endif()
+add_library(ct-travesty INTERFACE)
+target_include_directories(ct-travesty INTERFACE "thirdparty/travesty/include")

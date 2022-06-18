@@ -100,27 +100,5 @@ endif()
 
 ###
 if(CT_EXAMPLES)
-  add_library(ct-examples-common STATIC
-    "examples/common/include_vstgui.hpp"
-    "examples/common/vstgui_init.cpp"
-    "examples/common/vstgui_init.hpp"
-    "examples/common/vstgui_clap_gui.cpp"
-    "examples/common/vstgui_clap_gui.hpp"
-    "examples/common/vstgui_x11_runloop.cpp"
-    "examples/common/vstgui_x11_runloop.hpp"
-    "examples/common/apple_bundle.cpp"
-    "examples/common/apple_bundle.hpp")
-  target_include_directories(ct-examples-common PUBLIC "examples")
-  target_link_libraries(ct-examples-common PUBLIC ct-uidescription ct-vstgui ct-clap PRIVATE sane-warning-flags)
-
-  add_v3_plugin(gain
-    NAME "Gain"
-    BUNDLE_IDENTIFIER "com.example.Gain"
-    COPYRIGHT "Free software under the ISC License"
-    HIGH_RESOLUTION_CAPABLE TRUE
-    SOURCES
-      "examples/gain/gain.cpp"
-    RESOURCES
-      "examples/gain//gain.uidesc")
-  target_link_libraries(gain PRIVATE ct-examples-common sane-warning-flags)
+  add_subdirectory("examples")
 endif()
