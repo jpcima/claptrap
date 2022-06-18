@@ -14,7 +14,7 @@
 #include "utility/unicode_helpers.hpp"
 #include "utility/ct_messages.hpp"
 #include "utility/ct_scope.hpp"
-#include <nonstd/span.hpp>
+#include "libs/span.hpp"
 #include <cstring>
 
 namespace ct {

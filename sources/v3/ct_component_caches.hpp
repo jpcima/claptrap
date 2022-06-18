@@ -2,8 +2,7 @@
 #include "ct_defs.hpp"
 #include "clap_id_map.hpp"
 #include "clap_helpers.hpp"
-#include <clap/clap.h>
-#include <nonstd/span.hpp>
+#include "libs/span.hpp"
 #include <vector>
 #include <memory>
 #include <cstdint>

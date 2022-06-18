@@ -1,6 +1,6 @@
 #pragma once
 #include "ct_defs.hpp"
-#include <nonstd/span.hpp>
+#include "libs/span.hpp"
 #include <cstdint>
 
 namespace ct {

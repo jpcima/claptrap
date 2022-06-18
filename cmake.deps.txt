@@ -55,18 +55,6 @@ target_include_directories(ct-travesty INTERFACE "thirdparty/travesty/include")
 add_library(ct-spin-mutex STATIC EXCLUDE_FROM_ALL "thirdparty/spin_mutex/src/spin_mutex.cpp")
 target_include_directories(ct-spin-mutex PUBLIC "thirdparty/spin_mutex/src")
 
-###
-add_library(ct-utf8 INTERFACE)
-target_include_directories(ct-utf8 INTERFACE "thirdparty/utf/include")
-
-###
-add_library(ct-span-lite INTERFACE)
-target_include_directories(ct-span-lite INTERFACE "thirdparty/span-lite/include")
-
-###
-add_library(ct-heapsort INTERFACE)
-target_include_directories(ct-heapsort INTERFACE "thirdparty/heapsort/include")
-
 ### dependencies below are for examples only
 if(NOT CT_EXAMPLES)
   return()

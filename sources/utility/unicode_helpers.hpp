@@ -1,11 +1,8 @@
 #pragma once
-#include <nonstd/span.hpp>
+#include "libs/utf.hpp"
+#include "libs/span.hpp"
 #include <string_view>
 #include <string>
-
-#define UTF_NAMESPACE_BEGIN namespace ct { namespace utf {
-#define UTF_NAMESPACE_END } }
-#include <utf/utf.hpp>
 
 namespace ct {
 

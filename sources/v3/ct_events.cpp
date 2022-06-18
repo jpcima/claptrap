@@ -1,6 +1,6 @@
 #include "ct_events.hpp"
 #include "utility/ct_assert.hpp"
-#include <heapsort.hpp>
+#include "libs/heapsort.hpp"
 #include <cstring>
 
 namespace ct {
@@ -62,7 +62,7 @@ void ct_events_buffer::sort_events_by_time()
         const clap_event_header *b = (const clap_event_header *)&m_buf[b_pos];
         return a->time < b->time;
     };
-    ks::heapsort(&m_ind[0], &m_ind[m_count], compare);
+    heapsort::heapsort(&m_ind[0], &m_ind[m_count], compare);
 }
 
 clap_input_events ct_events_buffer::as_clap_input() const noexcept

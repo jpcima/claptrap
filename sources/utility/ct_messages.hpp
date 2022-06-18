@@ -1,21 +1,7 @@
 #pragma once
+#include "libs/fmt.hpp"
 #include <cstdio>
 #include <cstdlib>
-
-#if defined(FMT_NAMESPACE)
-#   define fmt FMT_NAMESPACE
-#endif
-#include <fmt/format.h>
-#if defined(FMT_NAMESPACE)
-#   undef fmt
-#endif
-namespace ct { namespace fmt {
-#if defined(FMT_NAMESPACE)
-using namespace ::FMT_NAMESPACE;
-#else
-using namespace ::fmt;
-#endif
-} }
 
 #define CT_MESSAGE_PREFIX        "[ct] "
 #define CT_MESSAGE_PREFIX_SPACES "     "
@@ -39,7 +25,7 @@ using namespace ::fmt;
     } while (0)
 
 #define CT_LOG_PRINTF(format, ...)                  \
-    ct::fmt::print(stderr, format, ##__VA_ARGS__)
+    ::ct::fmt::print(stderr, format, ##__VA_ARGS__)
 
 #define CT_LOG_FLUSH()                          \
     std::fflush(stderr)

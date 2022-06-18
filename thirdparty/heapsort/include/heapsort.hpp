@@ -32,7 +32,14 @@
 #include <functional>
 #include <cstddef>
 
-namespace ks {
+#ifndef HEAPSORT_NAMESPACE_BEGIN
+#   define HEAPSORT_NAMESPACE_BEGIN namespace ks {
+#endif
+#ifndef HEAPSORT_NAMESPACE_END
+#   define HEAPSORT_NAMESPACE_END }
+#endif
+
+HEAPSORT_NAMESPACE_BEGIN
 
 namespace heapsort_detail {
 
@@ -49,7 +56,7 @@ typename T::pointer address_from_iterator(const T &x)
 }
 
 template <class type_t, class compare_t = std::less<type_t>>
-void ks_heapadjust(std::size_t i, std::size_t n, type_t l[], const compare_t &lt)
+void heapadjust(std::size_t i, std::size_t n, type_t l[], const compare_t &lt)
 {
     std::size_t k = i;
     type_t tmp = std::move(l[i]);
@@ -62,24 +69,24 @@ void ks_heapadjust(std::size_t i, std::size_t n, type_t l[], const compare_t &lt
 }
 
 template <class iterator_t, class compare_t = std::less<typename std::iterator_traits<iterator_t>::value_type>>
-void ks_heapmake(iterator_t first, iterator_t last, const compare_t &lt)
+void heapmake(iterator_t first, iterator_t last, const compare_t &lt)
 {
     typename std::iterator_traits<iterator_t>::pointer l = address_from_iterator(first);
     std::size_t lsize = std::distance(first, last);
     std::size_t i;
     for (i = lsize >> 1; i-- > 0; )
-        ks_heapadjust(i, lsize, l, lt);
+        heapadjust(i, lsize, l, lt);
 }
 
 template <class iterator_t, class compare_t = std::less<typename std::iterator_traits<iterator_t>::value_type>>
-void ks_heapsort(iterator_t first, iterator_t last, const compare_t &lt)
+void heapsort(iterator_t first, iterator_t last, const compare_t &lt)
 {
     typename std::iterator_traits<iterator_t>::pointer l = address_from_iterator(first);
     std::size_t lsize = std::distance(first, last);
     std::size_t i;
     for (i = lsize; i-- > 0; ) {
         std::swap(*l, l[i]);
-        ks_heapadjust(0, i, l, lt);
+        heapadjust(0, i, l, lt);
     }
 }
 
@@ -88,8 +95,8 @@ void ks_heapsort(iterator_t first, iterator_t last, const compare_t &lt)
 template <class iterator_t, class compare_t = std::less<typename std::iterator_traits<iterator_t>::value_type>>
 void heapsort(iterator_t first, iterator_t last, const compare_t &lt = {})
 {
-    heapsort_detail::ks_heapmake(first, last, lt);
-    heapsort_detail::ks_heapsort(first, last, lt);
+    heapsort_detail::heapmake(first, last, lt);
+    heapsort_detail::heapsort(first, last, lt);
 }
 
-} // namespace ks
+HEAPSORT_NAMESPACE_END

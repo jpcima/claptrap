@@ -1,8 +1,8 @@
 #pragma once
 #include "ct_defs.hpp"
 #include "ct_channel_mapping.hpp"
+#include "libs/span.hpp"
 #include <clap/clap.h>
-#include <nonstd/span.hpp>
 #include <string_view>
 #include <string>
 #include <cstdint>

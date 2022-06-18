@@ -15,7 +15,7 @@
 #   define CT_ALLOCA alloca
 #endif
 
-#define CT_ALLOCA_SPAN(count, /*type*/...) (nonstd::span<__VA_ARGS__>{ \
+#define CT_ALLOCA_SPAN(count, /*type*/...) (nonstd::span<__VA_ARGS__>{  \
             (__VA_ARGS__ *)CT_ALLOCA(count * sizeof(__VA_ARGS__)), (count)})
 
 //------------------------------------------------------------------------------
