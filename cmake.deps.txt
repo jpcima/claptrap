@@ -63,10 +63,6 @@ add_library(ct-utf8 INTERFACE)
 target_include_directories(ct-utf8 INTERFACE "thirdparty/utf/include")
 
 ###
-add_library(ct-scope-lite INTERFACE)
-target_include_directories(ct-scope-lite INTERFACE "thirdparty/scope-lite/include")
-
-###
 add_library(ct-span-lite INTERFACE)
 target_include_directories(ct-span-lite INTERFACE "thirdparty/span-lite/include")
 

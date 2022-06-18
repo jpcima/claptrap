@@ -1,7 +1,7 @@
 #pragma once
 #include "utility/ct_safe_fnptr.hpp"
 #include "utility/ct_messages.hpp"
-#include <nonstd/scope.hpp>
+#include "utility/ct_scope.hpp"
 #include <cstddef>
 
 // A custom UUID used as namespace for VST3 identifiers.
@@ -52,7 +52,7 @@ enum {
         CT_LOG_PRINTF((i + 1 < plugin_call__depth_v) ? "   " : "+- ");  \
     CT_MESSAGE_NP("called {}", CT_FUNCSIG);                             \
     plugin_call__enter();                                               \
-    auto plugin_call__guard = nonstd::make_scope_exit([]() { plugin_call__leave(); })
+    auto plugin_call__guard = ct::defer([]() { plugin_call__leave(); })
 
 #   define LOG_PLUGIN_SELF_CALL(self)                                   \
     const size_t plugin_call__depth_v = plugin_call__depth();           \
@@ -62,7 +62,7 @@ enum {
         CT_LOG_PRINTF((i + 1 < plugin_call__depth_v) ? "   " : "+- ");  \
     CT_MESSAGE_NP("called ({}) {}", (self), CT_FUNCSIG);                \
     plugin_call__enter();                                               \
-    auto plugin_call__guard = nonstd::make_scope_exit([]() { plugin_call__leave(); })
+    auto plugin_call__guard = ct::defer([]() { plugin_call__leave(); })
 
 #   define LOG_PLUGIN_RET(ret) do {                         \
         decltype((ret)) ret__value = (ret);                 \

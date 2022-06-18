@@ -13,8 +13,8 @@
 #include "clap_helpers.hpp"
 #include "utility/unicode_helpers.hpp"
 #include "utility/ct_messages.hpp"
+#include "utility/ct_scope.hpp"
 #include <nonstd/span.hpp>
-#include <nonstd/scope.hpp>
 #include <cstring>
 
 const ct_component::vtable ct_component::s_vtable;
@@ -32,7 +32,7 @@ ct_component::ct_component(const v3_tuid clsiid, const clap_plugin_factory *fact
     const clap_plugin *plug = CLAP_CALL(factory, create_plugin, factory, &host->m_clap_host, desc->id);
     if (!plug)
         return;
-    auto plug_cleanup = nonstd::make_scope_exit([plug, init_ok]() { if (!*init_ok) CLAP_CALL(plug, destroy, plug); });
+    auto plug_cleanup = ct::defer([plug, init_ok]() { if (!*init_ok) CLAP_CALL(plug, destroy, plug); });
 
     if (!CLAP_CALL(plug, init, plug))
         return;

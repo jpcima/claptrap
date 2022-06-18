@@ -1,9 +1,9 @@
 #include "ct_plugin_factory.hpp"
 #include "ct_defs.hpp"
 #include "utility/unicode_helpers.hpp"
+#include "utility/ct_scope.hpp"
 #include <travesty/base.h>
 #include <clap/clap.h>
-#include <nonstd/scope.hpp>
 #include <memory>
 #if defined(_WIN32)
 #   include <windows.h>
@@ -86,12 +86,12 @@ extern "C" CT_EXPORT bool bundleEntry(CFBundleRef bundle)
     CFURLRef url = CFBundleCopyExecutableURL(bundle);
     if (!url)
         LOG_PLUGIN_RET(false);
-    auto url_cleanup = nonstd::make_scope_exit([url]() { CFRelease(url); });
+    auto url_cleanup = ct::defer([url]() { CFRelease(url); });
 
     CFStringRef path = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
     if (!path)
         LOG_PLUGIN_RET(false);
-    auto path_cleanup = nonstd::make_scope_exit([path]() { CFRelease(path); });
+    auto path_cleanup = ct::defer([path]() { CFRelease(path); });
 
     ///
     auto get_string_from_cfstring = [](CFStringRef str, std::string *result) -> bool {
