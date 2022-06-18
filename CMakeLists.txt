@@ -89,6 +89,8 @@ add_library(ct-v3 OBJECT
   "sources/utility/ct_bump_allocator.hpp"
   "sources/utility/ct_memory.hpp"
   "sources/utility/ct_messages.hpp"
+  "sources/utility/ct_posix_pipe.cpp"
+  "sources/utility/ct_posix_pipe.hpp"
   "sources/utility/ct_uuid.cpp"
   "sources/utility/ct_uuid.hpp"
   "sources/utility/ct_safe_fnptr.hpp"
