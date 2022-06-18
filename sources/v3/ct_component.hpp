@@ -117,9 +117,6 @@ struct ct_component {
     v3::plugin_frame *m_editor_frame = nullptr;
     clap_id m_idle_timer_id = 0;
     bool m_have_idle_timer = false;
-#if CT_X11
-    v3::run_loop *m_runloop = nullptr;
-#endif
 
     // inter-thread interaction
     std::atomic<int> m_flag_sched_plugin_callback{0};

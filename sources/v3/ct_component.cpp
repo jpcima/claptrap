@@ -167,16 +167,6 @@ void ct_component::sync_parameter_values_to_controller_from_plugin()
 void ct_component::set_run_loop(v3::run_loop *runloop)
 {
     m_host->set_run_loop(runloop);
-
-    if (m_runloop == runloop)
-        return;
-
-    v3::run_loop *old = m_runloop;
-    if (old)
-        old->m_vptr->i_unk.unref(old);
-    if (runloop)
-        runloop->m_vptr->i_unk.ref(runloop);
-    m_runloop = runloop;
 }
 #endif
 
