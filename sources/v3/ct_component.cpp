@@ -6,6 +6,7 @@
 #include "ct_plug_view.hpp"
 #include "ct_timer_handler.hpp"
 #include "ct_host.hpp"
+#include "ct_host_loop.hpp"
 #include "ct_stream.hpp"
 #include "ct_events.hpp"
 #include "ct_event_conversion.hpp"
@@ -107,10 +108,8 @@ ct_component::ct_component(const v3_tuid clsiid, const clap_plugin_factory *fact
     cache->update_caches_now();
 
     // idle timer
-    if (ct_host::timer_support__register_timer(&host->m_clap_host, v3_idle_timer_interval, &m_idle_timer_id)) {
-        host->m_timers[m_idle_timer_id]->m_reserved = true;
+    if (host->m_host_loop->register_timer(v3_idle_timer_interval, &m_idle_timer_id, true))
         m_have_idle_timer = true;
-    }
 
     //
     *init_ok = true;

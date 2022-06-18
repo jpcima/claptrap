@@ -74,6 +74,8 @@ add_library(ct-v3 OBJECT
   "sources/v3/ct_events.hpp"
   "sources/v3/ct_host.cpp"
   "sources/v3/ct_host.hpp"
+  "sources/v3/ct_host_loop.cpp"
+  "sources/v3/ct_host_loop.hpp"
   "sources/v3/ct_plugin_factory.cpp"
   "sources/v3/ct_plugin_factory.hpp"
   "sources/v3/ct_stream.cpp"

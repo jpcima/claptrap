@@ -3,14 +3,13 @@
 #include "travesty_helpers.hpp"
 #include <clap/clap.h>
 #include <string>
-#include <vector>
-#include <memory>
 
 namespace ct {
 
 struct ct_component;
 struct ct_event_handler;
 struct ct_timer_handler;
+struct ct_host_loop;
 
 struct ct_host {
     explicit ct_host(v3::object *hostcontext);
@@ -49,6 +48,11 @@ struct ct_host {
     static bool posix_fd__register_fd(const clap_host *host, int fd, clap_posix_fd_flags_t flags);
     static bool posix_fd__modify_fd(const clap_host *host, int fd, clap_posix_fd_flags_t flags);
     static bool posix_fd__unregister_fd(const clap_host *host, int fd);
+#endif
+
+    //--------------------------------------------------------------------------
+#if CT_X11
+    void set_run_loop(v3::run_loop *runloop);
 #endif
 
     //--------------------------------------------------------------------------
@@ -99,54 +103,17 @@ struct ct_host {
         &timer_support__unregister_timer,
     };
 
-#if CT_X11
     //--------------------------------------------------------------------------
+#if CT_X11
     const clap_host_posix_fd_support m_clap_posix_fd_support = {
         &posix_fd__register_fd,
         &posix_fd__modify_fd,
         &posix_fd__unregister_fd,
      };
-
-    struct posix_fd_data {
-        ct_host *m_host = nullptr;
-        clap_id m_idx = 0;
-        int m_fd = -1;
-        enum {
-            pending, // timer on wait until runloop available
-            registered, // timer operational
-        } m_status = pending;
-        ct_event_handler *m_handler = nullptr;
-    };
-
-    std::vector<std::unique_ptr<posix_fd_data>> m_posix_fd;
 #endif
 
-#if CT_X11
-    void set_run_loop(v3::run_loop *runloop);
-#endif
-
-    struct timer_data {
-        ct_host *m_host = nullptr;
-        bool m_reserved = false;
-        clap_id m_idx = 0;
-        uint32_t m_interval = 0;
-#if defined(_WIN32)
-        uintptr_t m_timer_id = 0;
-#elif defined(__APPLE__)
-        void *m_timer = nullptr; // CFRunLoopTimerRef
-#elif CT_X11
-        enum {
-            pending, // timer on wait until runloop available
-            registered, // timer operational
-        } m_status = pending;
-        ct_timer_handler *m_handler = nullptr;
-#endif
-    };
-
-    std::vector<std::unique_ptr<timer_data>> m_timers;
-#if CT_X11
-    v3::run_loop *m_runloop = nullptr;
-#endif
+    //--------------------------------------------------------------------------
+    std::unique_ptr<ct_host_loop> m_host_loop;
 };
 
 } // namespace ct
