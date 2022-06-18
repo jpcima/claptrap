@@ -327,7 +327,7 @@ v3_result V3_API ct_component::get_bus_info(void *self_, int32_t media_type, int
 
         const clap_audio_port_info ci = ports[(uint32_t)bus_idx];
         bus_info->channel_count = ci.channel_count;
-        UTF_copy(bus_info->bus_name, ci.name);
+        ct::UTF_copy(bus_info->bus_name, ci.name);
         bus_info->bus_type = (ci.flags & CLAP_AUDIO_PORT_IS_MAIN) ? V3_MAIN : V3_AUX;
         bus_info->flags = V3_DEFAULT_ACTIVE;
         if (!std::strcmp(ci.port_type, CLAP_PORT_CV))
@@ -340,7 +340,7 @@ v3_result V3_API ct_component::get_bus_info(void *self_, int32_t media_type, int
             LOG_PLUGIN_RET(V3_FALSE);
 
         bus_info->channel_count = 16;
-        UTF_copy(bus_info->bus_name, (bus_direction == V3_INPUT) ? "Event input" : "Event output");
+        ct::UTF_copy(bus_info->bus_name, (bus_direction == V3_INPUT) ? "Event input" : "Event output");
         bus_info->bus_type = V3_MAIN;
         bus_info->flags = V3_DEFAULT_ACTIVE;
 

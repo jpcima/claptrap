@@ -1,5 +1,7 @@
 #include "url_helpers.hpp"
 
+namespace ct {
+
 std::string URL_decode(std::string_view text)
 {
     std::string result;
@@ -34,3 +36,5 @@ std::string URL_decode(std::string_view text)
 
     return result;
 }
+
+} // namespace ct

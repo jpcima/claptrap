@@ -50,7 +50,7 @@ uint32_t ct_unit_description::get_or_create_module_unit(std::string_view module)
             m_units.emplace_back(unit);
             unit->info.id = unit_id;
             unit->info.parent_unit_id = parent_id;
-            UTF_copy(unit->info.name, name);
+            ct::UTF_copy(unit->info.name, name);
             unit->info.program_list_id = -1;
             unit->path.assign(path);
 

@@ -96,7 +96,7 @@ add_library(ct-fmt STATIC EXCLUDE_FROM_ALL
 target_include_directories(ct-fmt PUBLIC
   "${fmt_SOURCE_DIR}/include")
 target_compile_definitions(ct-fmt
-  PUBLIC "FMT_NAMESPACE=CTfmt"
+  PUBLIC "FMT_NAMESPACE=ct__fmt"
   PRIVATE "fmt=FMT_NAMESPACE")
 
 ###

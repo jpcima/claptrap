@@ -12,12 +12,19 @@
 
 #include <cstdint>
 
+#ifndef UTF_NAMESPACE_BEGIN
+#   define UTF_NAMESPACE_BEGIN namespace utf {
+#endif
+#ifndef UTF_NAMESPACE_END
+#   define UTF_NAMESPACE_END }
+#endif
+
 ///
 /// \brief Namespace that holds basic operations on UTF encoded sequences 
 ///
 /// All functions defined in this namespace do not require linking with Boost.Locale library
 ///
-namespace utf {
+UTF_NAMESPACE_BEGIN
     /// \cond INTERNAL
     #ifdef __GNUC__
     #   define UTF_LIKELY(x)   __builtin_expect((x),1)
@@ -453,7 +460,7 @@ namespace utf {
     #endif
 
 
-} // utf
+UTF_NAMESPACE_END
 
 
 #endif

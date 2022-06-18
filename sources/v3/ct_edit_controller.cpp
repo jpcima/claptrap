@@ -129,7 +129,7 @@ v3_result V3_API ct_edit_controller::get_parameter_info(void *self_, int32_t par
     info->flags |= (cf & CLAP_PARAM_IS_BYPASS) ? V3_PARAM_IS_BYPASS : 0;
 
     info->param_id = id;
-    UTF_copy(info->title, ci.name);
+    ct::UTF_copy(info->title, ci.name);
     info->short_title[0] = 0;
     info->units[0] = 0;
     if (cf & CLAP_PARAM_IS_STEPPED) {
@@ -164,7 +164,7 @@ v3_result V3_API ct_edit_controller::get_parameter_string_for_value(void *self_,
         LOG_PLUGIN_RET(V3_FALSE);
 
     nonstd::span<int16_t> output{output_, 128};
-    UTF_copy(output, display);
+    ct::UTF_copy(output, display);
 
     LOG_PLUGIN_RET(V3_OK);
 }
@@ -182,7 +182,7 @@ v3_result V3_API ct_edit_controller::get_parameter_value_for_string(void *self_,
         LOG_PLUGIN_RET(V3_FALSE);
 
     char display[256] = {};
-    UTF_copy(display, input);
+    ct::UTF_copy(display, input);
 
     double plain = {};
     if (!CLAP_CALL(params, text_to_value, plug, id, display, &plain))

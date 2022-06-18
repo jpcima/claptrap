@@ -1,9 +1,15 @@
 #pragma once
-#include <utf/utf.hpp>
 #include <nonstd/span.hpp>
 #include <string_view>
 #include <string>
 
+#define UTF_NAMESPACE_BEGIN namespace ct { namespace utf {
+#define UTF_NAMESPACE_END } }
+#include <utf/utf.hpp>
+
+namespace ct {
+
+//------------------------------------------------------------------------------
 template <class Y, class X>
 std::basic_string<Y> UTF_convert(std::basic_string_view<X> strX)
 {
@@ -101,3 +107,7 @@ void UTF_copy(Y (&startY)[SizeY], const X *strX)
 {
     UTF_copy<Y, X>(nonstd::span<Y>{startY, startY + SizeY}, std::basic_string_view<X>{strX});
 }
+
+//------------------------------------------------------------------------------
+
+} // namespace ct
