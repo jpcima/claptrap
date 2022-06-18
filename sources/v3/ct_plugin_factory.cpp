@@ -2,8 +2,8 @@
 #include "ct_component.hpp"
 #include "ct_host.hpp"
 #include "clap_helpers.hpp"
-#include "url_helpers.hpp"
-#include "unicode_helpers.hpp"
+#include "utility/url_helpers.hpp"
+#include "utility/unicode_helpers.hpp"
 #include "libs/lib_uuid.h"
 #include <memory>
 #include <cstring>

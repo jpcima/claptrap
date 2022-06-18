@@ -1,6 +1,6 @@
 #include "ct_unit_description.hpp"
 #include "ct_component.hpp"
-#include "unicode_helpers.hpp"
+#include "utility/unicode_helpers.hpp"
 
 const ct_unit_description::vtable ct_unit_description::s_vtable;
 

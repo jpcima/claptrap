@@ -1,6 +1,6 @@
 #include "ct_plugin_factory.hpp"
 #include "ct_defs.hpp"
-#include "unicode_helpers.hpp"
+#include "utility/unicode_helpers.hpp"
 #include <travesty/base.h>
 #include <clap/clap.h>
 #include <nonstd/scope.hpp>

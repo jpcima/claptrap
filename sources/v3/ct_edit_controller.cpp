@@ -3,7 +3,7 @@
 #include "ct_plug_view.hpp"
 #include "ct_unit_description.hpp"
 #include "ct_component_caches.hpp"
-#include "unicode_helpers.hpp"
+#include "utility/unicode_helpers.hpp"
 #include <cmath>
 #include <cstring>
 

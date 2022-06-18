@@ -11,7 +11,7 @@
 #include "ct_event_conversion.hpp"
 #include "ct_component_caches.hpp"
 #include "clap_helpers.hpp"
-#include "unicode_helpers.hpp"
+#include "utility/unicode_helpers.hpp"
 #include "utility/ct_messages.hpp"
 #include <nonstd/span.hpp>
 #include <nonstd/scope.hpp>

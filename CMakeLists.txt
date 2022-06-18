@@ -73,16 +73,16 @@ add_library(ct-v3 OBJECT
   "sources/v3/clap_helpers.cpp"
   "sources/v3/clap_helpers.hpp"
   "sources/v3/travesty_helpers.hpp"
-  "sources/v3/unicode_helpers.hpp"
-  "sources/v3/url_helpers.cpp"
-  "sources/v3/unicode_helpers.hpp"
   "sources/utility/ct_assert.hpp"
   "sources/utility/ct_attributes.hpp"
   "sources/utility/ct_bump_allocator.cpp"
   "sources/utility/ct_bump_allocator.hpp"
   "sources/utility/ct_memory.hpp"
   "sources/utility/ct_messages.hpp"
-  "sources/utility/ct_safe_fnptr.hpp")
+  "sources/utility/ct_safe_fnptr.hpp"
+  "sources/utility/unicode_helpers.hpp"
+  "sources/utility/url_helpers.cpp"
+  "sources/utility/url_helpers.hpp")
 target_compile_definitions(ct-v3 PUBLIC "CLAP_EXPORT=")
 target_include_directories(ct-v3 PRIVATE "sources")
 target_link_libraries(ct-v3 PUBLIC ct-clap PRIVATE ct-travesty ct-uuid ct-utf8 ct-fmt ct-scope-lite ct-span-lite ct-heapsort sane-warning-flags)

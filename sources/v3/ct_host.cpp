@@ -2,9 +2,9 @@
 #include "ct_component.hpp"
 #include "ct_event_handler.hpp"
 #include "ct_timer_handler.hpp"
-#include "unicode_helpers.hpp"
 #include "utility/ct_assert.hpp"
 #include "utility/ct_messages.hpp"
+#include "utility/unicode_helpers.hpp"
 #include <unordered_map>
 #include <cstring>
 
