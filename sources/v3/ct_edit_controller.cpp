@@ -313,8 +313,9 @@ v3_plugin_view **V3_API ct_edit_controller::create_view(void *self_, const char 
             view->m_delete_hook = +[](ct_plug_view *self)
             {
                 ct_component *comp = self->m_comp;
-                comp->m_editor = nullptr;
+                comp->set_run_loop(nullptr);
                 comp->m_editor_frame = nullptr;
+                comp->m_editor = nullptr;
             };
             view->m_set_frame_hook = +[](ct_plug_view *self, v3::plugin_frame *frame)
             {

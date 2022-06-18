@@ -96,6 +96,18 @@ v3_result V3_API ct_plug_view::is_platform_type_supported(void *self_, const cha
     LOG_PLUGIN_RET(V3_FALSE);
 }
 
+static bool validate_frame(v3::plugin_frame *frame)
+{
+#if CT_X11
+    // ensure we have a frame and a runloop in X11
+    v3::run_loop *runloop = nullptr;
+    if (!frame || frame->m_vptr->i_unk.query_interface(frame, v3_run_loop_iid, (void **)&runloop) != V3_OK)
+        return false;
+#endif
+
+    return true;
+}
+
 v3_result V3_API ct_plug_view::attached(void *self_, void *parent, const char *platform_type)
 {
     LOG_PLUGIN_SELF_CALL(self_);
@@ -116,12 +128,8 @@ v3_result V3_API ct_plug_view::attached(void *self_, void *parent, const char *p
         LOG_PLUGIN_RET(V3_FALSE);
 
     v3::plugin_frame *frame = self->m_frame;
-#if CT_X11
-    // ensure we have a frame and a runloop in X11
-    v3::run_loop *runloop = nullptr;
-    if (!frame || frame->m_vptr->i_unk.query_interface(frame, v3_run_loop_iid, (void **)&runloop) != V3_OK)
+    if (!validate_frame(frame))
         LOG_PLUGIN_RET(V3_FALSE);
-#endif
 
     if (self->m_set_frame_hook)
         self->m_set_frame_hook(self, frame);
@@ -280,14 +288,7 @@ v3_result V3_API ct_plug_view::set_frame(void *self_, v3_plugin_frame **frame_)
     ct_plug_view *self = (ct_plug_view *)self_;
     v3::plugin_frame *frame = (v3::plugin_frame *)frame_;
 
-    if (self->m_frame != frame) {
-        v3::plugin_frame *old = self->m_frame;
-        if (old)
-            old->m_vptr->i_unk.unref(old);
-        if (frame)
-            frame->m_vptr->i_unk.ref(frame);
-        self->m_frame = frame;
-    }
+    self->m_frame = frame;
 
     LOG_PLUGIN_RET(V3_OK);
 }
