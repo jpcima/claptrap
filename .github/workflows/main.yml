@@ -134,4 +134,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: VST3 for ${{matrix.display-name}}
-          path: "${{runner.workspace}}/build/*.vst3"
+          path: "${{runner.workspace}}/build/examples/*.vst3"
