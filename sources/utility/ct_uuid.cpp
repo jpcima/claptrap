@@ -5,6 +5,7 @@
 #define UUID_API static
 #define SHA1_API static
 #define MD5_API static
+#define CRYPTORAND_API static
 
 #if defined(__GNUC__)
 #   pragma GCC diagnostic push
