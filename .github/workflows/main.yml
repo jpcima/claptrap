@@ -71,6 +71,7 @@ jobs:
       platform: ${{matrix.platform}}
       release_arch: ${{matrix.release-arch}}
       cmake_generator: ${{matrix.cmake-generator}}
+      cmake_options: -DCT_DOWNLOAD_CLAP=ON -DCT_DOWNLOAD_FMT=ON
       build_type: Release
       num_jobs: 2
       MACOSX_DEPLOYMENT_TARGET: 10.12
