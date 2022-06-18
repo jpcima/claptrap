@@ -95,6 +95,8 @@ add_library(ct-v3 OBJECT
   "sources/libs/heapsort.hpp"
   "sources/libs/span.hpp"
   "sources/libs/utf.hpp")
+target_precompile_headers(ct-v3 PRIVATE
+  "sources/libs/fmt.hpp")
 target_compile_definitions(ct-v3 PUBLIC "CLAP_EXPORT=")
 target_include_directories(ct-v3 PRIVATE "sources")
 target_link_libraries(ct-v3 PUBLIC ct-clap PRIVATE ct-travesty ct-fmt sane-warning-flags)
