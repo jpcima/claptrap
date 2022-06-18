@@ -1,19 +1,10 @@
 # -*- cmake -*-
 
 include(FetchContent)
-include(CheckCSourceCompiles)
-include(CheckCXXSourceCompiles)
+include(CheckLinkerFlag)
 
 ###
-function(ct_check_linker_options VAR)
-  set(CMAKE_REQUIRED_LINK_OPTIONS ${ARGN})
-  if(MSVC)
-    list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "/WX")
-  endif()
-  check_c_source_compiles("int main() { return 0; }" "${VAR}")
-endfunction()
-
-ct_check_linker_options(CT_HAVE_LINKER_FLAG_NO_UNDEFINED "-Xlinker" "--no-undefined")
+check_linker_flag(C "-Wl,--no-undefined" CT_HAVE_LINKER_FLAG_NO_UNDEFINED)
 
 ###
 set(CT_CLAP_FETCH_VERSION "1.0.2")
