@@ -262,7 +262,7 @@ template <> inline double **v3_buffer_ptrs<double>(const v3_audio_bus_buffers &a
 
 ///
 template <class Real>
-static void prepare_processing_buffers(ct_component *comp, v3_process_data *data, ct_bump_allocator *allocator, clap_process *clap_data)
+static void prepare_processing_buffers(ct_component *comp, v3_process_data *data, ct::bump_allocator *allocator, clap_process *clap_data)
 {
     const ct_caches::ports_t *audio_ports = comp->m_cache->get_audio_ports();
 
@@ -354,7 +354,7 @@ static void prepare_processing_buffers(ct_component *comp, v3_process_data *data
 }
 
 template <class Real>
-static void release_processing_buffers(ct_component *comp, v3_process_data *data, ct_bump_allocator *allocator, clap_process *clap_data)
+static void release_processing_buffers(ct_component *comp, v3_process_data *data, ct::bump_allocator *allocator, clap_process *clap_data)
 {
     // transfer output buffers back to v3
 
@@ -445,7 +445,7 @@ v3_result V3_API ct_audio_processor::process(void *self_, v3_process_data *data)
     const clap_output_events clap_evts_out = comp->m_output_events->as_clap_output();
 
     //
-    ct_bump_allocator allocator{comp->m_dynamic_buffers.get(), comp->m_dynamic_capacity};
+    ct::bump_allocator allocator{comp->m_dynamic_buffers.get(), comp->m_dynamic_capacity};
 
     //
     clap_process clap_data{};
