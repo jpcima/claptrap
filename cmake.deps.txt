@@ -52,9 +52,6 @@ add_library(ct-travesty INTERFACE)
 target_include_directories(ct-travesty INTERFACE "thirdparty/travesty/include")
 
 ###
-add_library(ct-uuid STATIC EXCLUDE_FROM_ALL "sources/libs/lib_uuid.c")
-
-###
 add_library(ct-spin-mutex STATIC EXCLUDE_FROM_ALL "thirdparty/spin_mutex/src/spin_mutex.cpp")
 target_include_directories(ct-spin-mutex PUBLIC "thirdparty/spin_mutex/src")
 

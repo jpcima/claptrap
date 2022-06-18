@@ -4,7 +4,7 @@
 #include "clap_helpers.hpp"
 #include "utility/url_helpers.hpp"
 #include "utility/unicode_helpers.hpp"
-#include "libs/lib_uuid.h"
+#include "utility/ct_uuid.hpp"
 #include <memory>
 #include <cstring>
 
@@ -188,7 +188,7 @@ v3_result V3_API ct_plugin_factory::get_class_info_utf16(void *self_, int32_t id
     if (!desc)
         LOG_PLUGIN_RET(V3_FALSE);
 
-    uuid5(info->class_id, v3_wrapper_namespace_uuid, desc->id);
+    ct::generate_uuid(info->class_id, v3_wrapper_namespace_uuid, desc->id);
     info->cardinality = 0x7fffffff; // many instances
     UTF_copy(info->category, "Audio Module Class");
     UTF_copy(info->name, desc->name);
