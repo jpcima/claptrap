@@ -14,9 +14,11 @@ FetchContent_Declare(clap
   GIT_REPOSITORY "https://github.com/free-audio/clap.git"
   GIT_TAG "${CT_CLAP_FETCH_VERSION}")
 
-FetchContent_Declare(fmt
-  GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
-  GIT_TAG "${CT_FMT_FETCH_VERSION}")
+if(CT_DOWNLOAD_FMT)
+  FetchContent_Declare(fmt
+    GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
+    GIT_TAG "${CT_FMT_FETCH_VERSION}")
+endif()
 
 ###
 add_library(ct-clap INTERFACE)
@@ -34,21 +36,33 @@ else()
 endif()
 
 ###
-message(STATUS "Fetching fmt: version ${CT_FMT_FETCH_VERSION}")
-FetchContent_GetProperties(fmt)
-if(NOT fmt_POPULATED)
-  FetchContent_Populate(fmt)
+if(CT_DOWNLOAD_FMT)
+  message(STATUS "Fetching fmt: version ${CT_FMT_FETCH_VERSION}")
+  FetchContent_GetProperties(fmt)
+  if(NOT fmt_POPULATED)
+    FetchContent_Populate(fmt)
+  endif()
+  message(STATUS "Fetched fmt: ${fmt_SOURCE_DIR}")
+  #
+  add_library(ct-fmt STATIC EXCLUDE_FROM_ALL
+    "${fmt_SOURCE_DIR}/src/format.cc"
+    "${fmt_SOURCE_DIR}/src/os.cc")
+  target_include_directories(ct-fmt PUBLIC
+    "${fmt_SOURCE_DIR}/include")
+  target_compile_definitions(ct-fmt
+    PUBLIC "FMT_NAMESPACE=ct__fmt"
+    PRIVATE "fmt=FMT_NAMESPACE")
+else()
+  add_library(ct-fmt INTERFACE)
+  #
+  find_package(fmt REQUIRED)
+  if(CT_FMT_HEADER_ONLY)
+    target_link_libraries(ct-fmt INTERFACE fmt::fmt-header-only)
+    target_compile_definitions(ct-fmt INTERFACE "FMT_NAMESPACE=ct__fmt")
+  else()
+    target_link_libraries(ct-fmt INTERFACE fmt::fmt)
+  endif()
 endif()
-message(STATUS "Fetched fmt: ${fmt_SOURCE_DIR}")
-
-add_library(ct-fmt STATIC EXCLUDE_FROM_ALL
-  "${fmt_SOURCE_DIR}/src/format.cc"
-  "${fmt_SOURCE_DIR}/src/os.cc")
-target_include_directories(ct-fmt PUBLIC
-  "${fmt_SOURCE_DIR}/include")
-target_compile_definitions(ct-fmt
-  PUBLIC "FMT_NAMESPACE=ct__fmt"
-  PRIVATE "fmt=FMT_NAMESPACE")
 
 ###
 add_library(ct-travesty INTERFACE)
