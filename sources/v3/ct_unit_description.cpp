@@ -15,7 +15,7 @@ ct_unit_description::ct_unit_description()
     root->info.program_list_id = -1;
 }
 
-uint32_t ct_unit_description::get_or_create_module_unit(nonstd::string_view module)
+uint32_t ct_unit_description::get_or_create_module_unit(std::string_view module)
 {
     // input: a '/'-separated module string such as "oscillators/wt1"
 
@@ -31,9 +31,9 @@ uint32_t ct_unit_description::get_or_create_module_unit(nonstd::string_view modu
             ++next;
 
         // the full path so far
-        nonstd::string_view path{&module[0], next};
+        std::string_view path{&module[0], next};
         // just the component
-        nonstd::string_view name{&module[idx], next - idx};
+        std::string_view name{&module[idx], next - idx};
 
         // we may already have a unit by this path
         auto it = m_by_path.find(path);

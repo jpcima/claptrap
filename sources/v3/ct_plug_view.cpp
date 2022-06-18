@@ -84,7 +84,7 @@ v3_result V3_API ct_plug_view::is_platform_type_supported(void *self_, const cha
 
     CT_ASSERT(gui);
 
-    nonstd::string_view api_type = convert_clap_window_api_from_platform_type(platform_type);
+    std::string_view api_type = convert_clap_window_api_from_platform_type(platform_type);
     if (api_type.empty())
         LOG_PLUGIN_RET(V3_FALSE);
 
@@ -226,7 +226,7 @@ v3_result V3_API ct_plug_view::get_size(void *self_, v3_view_rect *rect)
         got_size = CLAP_CALL(gui, get_size, plug, &width, &height);
     }
     else {
-        nonstd::string_view api = get_clap_default_window_api();
+        std::string_view api = get_clap_default_window_api();
         // create temporary gui, only for size
         if (!CLAP_CALL(gui, create, plug, api.data(), true)) {
             *rect = v3_view_rect{};

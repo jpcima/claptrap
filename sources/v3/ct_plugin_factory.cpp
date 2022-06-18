@@ -76,9 +76,9 @@ v3_result V3_API ct_plugin_factory::get_factory_info(void *self_, v3_factory_inf
     UTF_copy(info->vendor, desc0->vendor);
     UTF_copy(info->url, desc0->url);
 
-    nonstd::string_view support_url{desc0->support_url};
+    std::string_view support_url{desc0->support_url};
     if (support_url.substr(0, 7) == "mailto:") {
-        nonstd::string_view support_email = support_url.substr(7);
+        std::string_view support_email = support_url.substr(7);
         std::size_t pos = support_email.find('?');
         if (pos != support_email.npos)
             support_email = support_email.substr(0, pos);

@@ -1,6 +1,5 @@
 #include "clap_helpers.hpp"
 #include "ct_defs.hpp"
-#include <nonstd/string_view.hpp>
 #include <list>
 #include <set>
 #include <unordered_map>
@@ -9,9 +8,9 @@
 
 std::string convert_categories_from_clap(const char *const *features)
 {
-    std::set<nonstd::string_view> cats;
+    std::set<std::string_view> cats;
 
-    static const std::unordered_map<nonstd::string_view, std::list<nonstd::string_view>> clap_to_vst3
+    static const std::unordered_map<std::string_view, std::list<std::string_view>> clap_to_vst3
     {
         {"analyzer", {"Analyzer"}},
         {"audio_effect", {"Fx"}},
@@ -44,7 +43,7 @@ std::string convert_categories_from_clap(const char *const *features)
     for (const char *const *featp = features; *featp; ++featp) {
         auto it = clap_to_vst3.find(*featp);
         if (it != clap_to_vst3.end()) {
-            for (nonstd::string_view cat : it->second)
+            for (std::string_view cat : it->second)
                 cats.insert(cat);
         }
     }
@@ -52,10 +51,10 @@ std::string convert_categories_from_clap(const char *const *features)
     std::string text;
     if (!cats.empty()) {
         size_t size = cats.size() - 1;
-        for (nonstd::string_view cat : cats)
+        for (std::string_view cat : cats)
             size += cat.size();
         text.reserve(size);
-        for (nonstd::string_view cat : cats) {
+        for (std::string_view cat : cats) {
             if (!text.empty()) text.push_back('|');
             text.append(cat.data(), cat.size());
         }
@@ -100,7 +99,7 @@ const clap_plugin_audio_ports *get_default_clap_plugin_audio_ports()
     return &ext;
 }
 
-nonstd::string_view convert_clap_window_api_to_platform_type(nonstd::string_view api)
+std::string_view convert_clap_window_api_to_platform_type(std::string_view api)
 {
 #if defined(_WIN32)
     if (api == CLAP_WINDOW_API_WIN32)
@@ -115,7 +114,7 @@ nonstd::string_view convert_clap_window_api_to_platform_type(nonstd::string_view
     return "";
 }
 
-nonstd::string_view convert_clap_window_api_from_platform_type(nonstd::string_view type)
+std::string_view convert_clap_window_api_from_platform_type(std::string_view type)
 {
 #if defined(_WIN32)
     if (type == "HWND")
@@ -130,7 +129,7 @@ nonstd::string_view convert_clap_window_api_from_platform_type(nonstd::string_vi
     return "";
 }
 
-bool convert_to_clap_window(void *wnd, nonstd::string_view platform_type, clap_window *window)
+bool convert_to_clap_window(void *wnd, std::string_view platform_type, clap_window *window)
 {
 #if defined(_WIN32)
     if (platform_type == "HWND") {
@@ -154,7 +153,7 @@ bool convert_to_clap_window(void *wnd, nonstd::string_view platform_type, clap_w
     return false;
 }
 
-nonstd::string_view get_clap_default_window_api()
+std::string_view get_clap_default_window_api()
 {
 #if defined(_WIN32)
     return CLAP_WINDOW_API_WIN32;

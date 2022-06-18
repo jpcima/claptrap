@@ -1,6 +1,6 @@
 #include "url_helpers.hpp"
 
-std::string URL_decode(nonstd::string_view text)
+std::string URL_decode(std::string_view text)
 {
     std::string result;
     result.reserve(text.size());

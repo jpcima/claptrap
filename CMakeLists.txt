@@ -85,7 +85,7 @@ add_library(ct-v3 OBJECT
   "sources/utility/ct_safe_fnptr.hpp")
 target_compile_definitions(ct-v3 PUBLIC "CLAP_EXPORT=")
 target_include_directories(ct-v3 PRIVATE "sources")
-target_link_libraries(ct-v3 PUBLIC ct-clap PRIVATE ct-travesty ct-uuid ct-utf8 ct-fmt ct-scope-lite ct-string-view-lite ct-span-lite ct-heapsort sane-warning-flags)
+target_link_libraries(ct-v3 PUBLIC ct-clap PRIVATE ct-travesty ct-uuid ct-utf8 ct-fmt ct-scope-lite ct-span-lite ct-heapsort sane-warning-flags)
 
 if(CT_ASSERTIONS)
   target_compile_definitions(ct-v3 PRIVATE "CT_ASSERTIONS")

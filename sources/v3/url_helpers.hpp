@@ -1,5 +1,5 @@
 #pragma once
-#include <nonstd/string_view.hpp>
+#include <string_view>
 #include <string>
 
-std::string URL_decode(nonstd::string_view text);
+std::string URL_decode(std::string_view text);

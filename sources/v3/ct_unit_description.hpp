@@ -2,7 +2,7 @@
 #include "ct_defs.hpp"
 #include "travesty_helpers.hpp"
 #include <travesty/unit.h>
-#include <nonstd/string_view.hpp>
+#include <string_view>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -12,7 +12,7 @@ struct ct_component;
 // A subobject of `ct_component`
 struct ct_unit_description {
     ct_unit_description();
-    uint32_t get_or_create_module_unit(nonstd::string_view module);
+    uint32_t get_or_create_module_unit(std::string_view module);
 
     //--------------------------------------------------------------------------
     static v3_result V3_API query_interface(void *self, const v3_tuid iid, void **obj);
@@ -67,5 +67,5 @@ struct ct_unit_description {
     };
 
     std::vector<std::unique_ptr<unit_info>> m_units;
-    std::unordered_map<nonstd::string_view, unit_info *> m_by_path;
+    std::unordered_map<std::string_view, unit_info *> m_by_path;
 };

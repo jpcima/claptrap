@@ -67,10 +67,6 @@ add_library(ct-scope-lite INTERFACE)
 target_include_directories(ct-scope-lite INTERFACE "thirdparty/scope-lite/include")
 
 ###
-add_library(ct-string-view-lite INTERFACE)
-target_include_directories(ct-string-view-lite INTERFACE "thirdparty/string-view-lite/include")
-
-###
 add_library(ct-span-lite INTERFACE)
 target_include_directories(ct-span-lite INTERFACE "thirdparty/span-lite/include")
 
