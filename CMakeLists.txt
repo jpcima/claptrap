@@ -32,9 +32,10 @@ include(SaneCompilerOptions)
 option(CT_EXAMPLES "Build the examples" "${CT_BUILD_FROM_HERE}")
 option(CT_LIVE_EDITING "Enable live editing with VSTGUI" OFF)
 option(CT_ASSERTIONS "Enable assertions regardless of build type" OFF)
+option(CT_DOWNLOAD_CLAP "Download the CLAP library" OFF)
 option(CT_DOWNLOAD_FMT "Download the fmt library" OFF)
 option(CT_FMT_HEADER_ONLY "Use fmt in a header-only fashion" OFF)
-set(CT_CLAP_SOURCE_DIR "" CACHE FILEPATH "Path to external CLAP source directory (optional)")
+set(CT_CLAP_INCLUDE_DIR "" CACHE FILEPATH "Path to CLAP headers (optional)")
 
 ###
 include("cmake.deps.txt")
