@@ -45,46 +45,28 @@ enum {
 #   define LOG_PLUGIN_RET_PTR(ret) return (ret)
 #else
 #   define LOG_PLUGIN_CALL                                              \
-    const size_t plugin_call__depth_v = ct::plugin_call__depth();       \
-    CT_LOG_PRINT((plugin_call__depth_v > 0) ?                          \
-                 CT_MESSAGE_PREFIX_SPACES : CT_MESSAGE_PREFIX);         \
-    for (size_t i = 0; i < plugin_call__depth_v; ++i)                   \
-        CT_LOG_PRINT((i + 1 < plugin_call__depth_v) ? "   " : "+- ");   \
-    CT_MESSAGE_NP("called ", CT_FUNCSIG);                               \
-    ct::plugin_call__enter();                                           \
+    ::ct::plugin_call__enter(nullptr, CT_FUNCSIG);                      \
     auto plugin_call__guard = ct::defer([]() { ct::plugin_call__leave(); })
 
 #   define LOG_PLUGIN_SELF_CALL(self)                                   \
-    const size_t plugin_call__depth_v = ct::plugin_call__depth();       \
-    CT_LOG_PRINT((plugin_call__depth_v > 0) ?                           \
-                 CT_MESSAGE_PREFIX_SPACES : CT_MESSAGE_PREFIX);         \
-    for (size_t i = 0; i < plugin_call__depth_v; ++i)                   \
-        CT_LOG_PRINT((i + 1 < plugin_call__depth_v) ? "   " : "+- ");   \
-    CT_MESSAGE_NP("called (", (self), ") ", CT_FUNCSIG);                \
-    ct::plugin_call__enter();                                           \
+    ::ct::plugin_call__enter((self), CT_FUNCSIG);                       \
     auto plugin_call__guard = ct::defer([]() { ct::plugin_call__leave(); })
 
 #   define LOG_PLUGIN_RET(ret) do {                         \
         decltype((ret)) ret__value = (ret);                 \
-        CT_LOG_PRINT(CT_MESSAGE_PREFIX_SPACES);             \
-        for (size_t i = 0; i < plugin_call__depth_v; ++i)   \
-            CT_LOG_PRINT("   ");                            \
-        CT_MESSAGE_NP("returned ", ret__value);             \
+        ::ct::plugin_log__return().print(ret__value, '\n'); \
         return ret__value;                                  \
     } while (0)
 
-#   define LOG_PLUGIN_RET_PTR(ret) do {                     \
-        decltype((ret)) ret__value = (ret);                 \
-        CT_LOG_PRINT(CT_MESSAGE_PREFIX_SPACES);             \
-        for (size_t i = 0; i < plugin_call__depth_v; ++i)   \
-            CT_LOG_PRINT("   ");                            \
-        CT_MESSAGE_NP("returned ", (void *)ret__value);     \
-        return ret__value;                                  \
+#   define LOG_PLUGIN_RET_PTR(ret) do {                             \
+        decltype((ret)) ret__value = (ret);                         \
+        ::ct::plugin_log__return().print((void *)ret__value, '\n'); \
+        return ret__value;                                          \
     } while (0)
 
 namespace ct {
-void plugin_call__enter();
+void plugin_call__enter(void *self, const char *funcsig);
 void plugin_call__leave();
-size_t plugin_call__depth();
+message_printer plugin_log__return();
 } // namespace ct
 #endif
