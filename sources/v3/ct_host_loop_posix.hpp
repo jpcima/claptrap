@@ -45,12 +45,12 @@ public:
         };
     } s_vtable;
 
-private:
     //--------------------------------------------------------------------------
     const vtable *m_vptr = &s_vtable;
     std::atomic<unsigned> m_refcnt{1};
     ct::posix_pipe m_message_pipe;
 
+private:
     //--------------------------------------------------------------------------
     class background;
     std::unique_ptr<background> m_background;

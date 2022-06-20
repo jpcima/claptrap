@@ -7,6 +7,9 @@
 #include "ct_timer_handler.hpp"
 #include "ct_host.hpp"
 #include "ct_host_loop.hpp"
+#if CT_X11
+#include "ct_host_loop_posix.hpp"
+#endif // CT_X11
 #include "ct_stream.hpp"
 #include "ct_events.hpp"
 #include "ct_event_conversion.hpp"
@@ -111,6 +114,13 @@ ct_component::ct_component(const v3_tuid clsiid, const clap_plugin_factory *fact
     if (host->m_host_loop->register_timer(v3_idle_timer_interval, &m_idle_timer_id, true))
         m_have_idle_timer = true;
 
+#if CT_X11
+    // substitute run loop in absence of open UI
+    threaded_run_loop *runloop = threaded_run_loop::instance();
+    set_run_loop((v3::run_loop *)runloop);
+    runloop->m_vptr->i_unk.unref(runloop);
+#endif
+
     //
     *init_ok = true;
 }
@@ -118,13 +128,20 @@ ct_component::ct_component(const v3_tuid clsiid, const clap_plugin_factory *fact
 ct_component::~ct_component()
 {
     if (m_have_idle_timer)
-        ct_host::timer_support__unregister_timer(&m_host->m_clap_host, m_idle_timer_id);
+        m_host->m_host_loop->unregister_timer(m_idle_timer_id);
+
     if (ct_plug_view *editor = m_editor)
         editor->m_vptr->i_unk.unref(editor);
+
+#if CT_X11
+    set_run_loop(nullptr);
+#endif
+
     if (m_handler)
         m_handler->m_vptr->i_unk.unref(m_handler);
     if (m_handler2)
         m_handler2->m_vptr->i_unk.unref(m_handler2);
+
     if (const clap_plugin *plug = m_plug)
         CLAP_CALL(plug, destroy, plug);
 }

@@ -3,6 +3,9 @@
 #include "ct_plug_view.hpp"
 #include "ct_unit_description.hpp"
 #include "ct_component_caches.hpp"
+#if CT_X11
+#include "ct_host_loop_posix.hpp"
+#endif
 #include "utility/unicode_helpers.hpp"
 #include <cmath>
 #include <cstring>
@@ -327,7 +330,9 @@ v3_plugin_view **V3_API ct_edit_controller::create_view(void *self_, const char 
             {
                 ct_component *comp = self->m_comp;
 #if CT_X11
-                comp->set_run_loop(nullptr);
+                threaded_run_loop *runloop = threaded_run_loop::instance();
+                comp->set_run_loop((v3::run_loop *)runloop);
+                runloop->m_vptr->i_unk.unref(runloop);
 #endif
                 comp->m_editor_frame = nullptr;
                 comp->m_editor = nullptr;
@@ -343,7 +348,11 @@ v3_plugin_view **V3_API ct_edit_controller::create_view(void *self_, const char 
                     CT_ASSERT(ret == V3_OK);
                     (void)ret;
                 }
+                else {
+                    runloop = (v3::run_loop *)threaded_run_loop::instance();
+                }
                 comp->set_run_loop(runloop);
+                runloop->m_vptr->i_unk.unref(runloop);
 #endif
             };
             comp->m_editor = view;
