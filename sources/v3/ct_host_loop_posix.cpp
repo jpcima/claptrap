@@ -30,9 +30,9 @@ struct threaded_run_loop::message {
         unregister_timer,
     };
 
-    type m_type{};
-    int64_t m_data1 = 0;
-    int64_t m_data2 = 0;
+    type m_type;
+    int64_t m_data1;
+    int64_t m_data2;
 
     struct completion {
         void notify(v3_result result);
@@ -42,7 +42,7 @@ struct threaded_run_loop::message {
         std::condition_variable m_cond;
     };
 
-    completion *m_completion = nullptr;
+    completion *m_completion;
 };
 
 //------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ static threaded_run_loop *s_unique_instance = nullptr;
 
 threaded_run_loop::threaded_run_loop()
 {
-    static_assert(std::is_trivially_copyable_v<threaded_run_loop::message>);
+    static_assert(std::is_pod_v<threaded_run_loop::message>);
     static_assert(sizeof(threaded_run_loop::message) <= PIPE_BUF);
 
     CT_ASSERT(s_unique_instance == nullptr);
@@ -99,7 +99,7 @@ threaded_run_loop::threaded_run_loop()
 
 threaded_run_loop::~threaded_run_loop()
 {
-    message msg;
+    message msg{};
     msg.m_type = message::quit;
     send_message(msg);
     m_background->join();
@@ -176,7 +176,7 @@ v3_result V3_API threaded_run_loop::register_event_handler(void *self_, v3_event
     if (!handler || fd == -1)
         return V3_FALSE;
 
-    message msg;
+    message msg{};
     msg.m_type = message::register_fd;
     msg.m_data1 = (intptr_t)handler;
     msg.m_data2 = fd;
@@ -195,7 +195,7 @@ v3_result V3_API threaded_run_loop::unregister_event_handler(void *self_, v3_eve
     if (!handler)
         return V3_FALSE;
 
-    message msg;
+    message msg{};
     msg.m_type = message::unregister_fd;
     msg.m_data1 = (intptr_t)handler;
     message::completion completion;
@@ -213,7 +213,7 @@ v3_result V3_API threaded_run_loop::register_timer(void *self_, v3_timer_handler
     if (!handler)
         return V3_FALSE;
 
-    message msg;
+    message msg{};
     msg.m_type = message::register_timer;
     msg.m_data1 = (intptr_t)handler;
     msg.m_data2 = (intptr_t)ms;
@@ -232,7 +232,7 @@ v3_result V3_API threaded_run_loop::unregister_timer(void *self_, v3_timer_handl
     if (!handler)
         return V3_FALSE;
 
-    message msg;
+    message msg{};
     msg.m_type = message::unregister_timer;
     msg.m_data1 = (intptr_t)handler;
     message::completion completion;
@@ -300,7 +300,7 @@ void threaded_run_loop::background::run()
 
             int fd = fds[i].fd;
             if (fd == message_fd) {
-                message msg;
+                message msg{};
                 self->receive_message(msg);
                 v3_result result = process_message(msg, &quit);
                 if (msg.m_completion)
