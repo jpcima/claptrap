@@ -113,6 +113,8 @@ threaded_run_loop *threaded_run_loop::instance()
     threaded_run_loop *instance = s_unique_instance;
     if (!instance)
         instance = new threaded_run_loop;
+    else
+        instance->m_vptr->i_unk.ref(instance);
     return instance;
 }
 

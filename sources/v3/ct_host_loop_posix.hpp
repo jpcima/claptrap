@@ -47,6 +47,7 @@ public:
 
 private:
     //--------------------------------------------------------------------------
+    const vtable *m_vptr = &s_vtable;
     std::atomic<unsigned> m_refcnt{1};
     ct::posix_pipe m_message_pipe;
 
