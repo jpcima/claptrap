@@ -109,7 +109,7 @@ target_precompile_headers(ct-v3 PRIVATE
   "sources/libs/fmt.hpp")
 target_compile_definitions(ct-v3 PUBLIC "CLAP_EXPORT=")
 target_include_directories(ct-v3 PRIVATE "sources")
-target_link_libraries(ct-v3 PUBLIC ct-clap PRIVATE ct-travesty ct-fmt sane-warning-flags)
+target_link_libraries(ct-v3 PUBLIC ct-clap PRIVATE ct-travesty ct-fmt sane-warning-flags Threads::Threads)
 
 if(CT_ASSERTIONS)
   target_compile_definitions(ct-v3 PRIVATE "CT_ASSERTIONS")

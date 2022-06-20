@@ -4,6 +4,9 @@ include(FetchContent)
 include(CheckLinkerFlag)
 
 ###
+find_package(Threads REQUIRED)
+
+###
 check_linker_flag(C "-Wl,--no-undefined" CT_HAVE_LINKER_FLAG_NO_UNDEFINED)
 
 ###
