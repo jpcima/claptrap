@@ -88,4 +88,20 @@ struct run_loop {
     vtable *m_vptr;
 };
 
+struct event_handler {
+    struct vtable {
+        v3_funknown i_unk;
+        v3_event_handler i_handler;
+    };
+    vtable *m_vptr;
+};
+
+struct timer_handler {
+    struct vtable {
+        v3_funknown i_unk;
+        v3_timer_handler i_handler;
+    };
+    vtable *m_vptr;
+};
+
 } // namespace v3

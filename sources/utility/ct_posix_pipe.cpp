@@ -1,43 +1,9 @@
 #include "ct_posix_pipe.hpp"
 #if !defined(_WIN32)
+#include <fcntl.h>
 #include <cerrno>
 
 namespace ct {
-
-posix_pipe::~posix_pipe() noexcept
-{
-    reset();
-}
-
-posix_pipe::posix_pipe(posix_pipe &&other) noexcept
-{
-    m_reader_fd = other.m_reader_fd;
-    m_writer_fd = other.m_writer_fd;
-    other.m_reader_fd = -1;
-    other.m_writer_fd = -1;
-}
-
-posix_pipe &posix_pipe::operator=(posix_pipe &&other) noexcept
-{
-    if (this != &other) {
-        reset();
-        m_reader_fd = other.m_reader_fd;
-        m_writer_fd = other.m_writer_fd;
-        other.m_reader_fd = -1;
-        other.m_writer_fd = -1;
-    }
-    return *this;
-}
-
-void posix_pipe::reset() noexcept
-{
-    if (*this) {
-        close(m_reader_fd);
-        close(m_writer_fd);
-        m_reader_fd = -1;
-        m_writer_fd = -1;
-    }
-}
 
 posix_pipe posix_pipe::create()
 {
@@ -71,8 +37,8 @@ posix_pipe posix_pipe::create(std::error_code &ec) noexcept
 #endif
 
     posix_pipe pp;
-    pp.m_reader_fd = pipedes[0];
-    pp.m_writer_fd = pipedes[1];
+    pp.m_reader_fd = posix_fd::owned(pipedes[0]);
+    pp.m_writer_fd = posix_fd::owned(pipedes[1]);
 
     return pp;
 }
