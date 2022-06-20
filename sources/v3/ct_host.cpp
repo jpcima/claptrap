@@ -11,14 +11,15 @@ namespace ct {
 ct_host::ct_host(v3::object *hostcontext)
 {
     // fill in host info
-    {
+    if (hostcontext) {
         v3::host_application *app = nullptr;
-        if (hostcontext && hostcontext->m_vptr->i_unk.query_interface(hostcontext, v3_host_application_iid, (void **)&app) == V3_OK) {
+        if (hostcontext->m_vptr->i_unk.query_interface(hostcontext, v3_host_application_iid, (void **)&app) == V3_OK) {
             v3_str_128 name16{};
             if (app->m_vptr->i_app.get_name(app, name16) == V3_OK) {
                 m_clap_host_name = UTF_convert<char>(name16);
                 m_clap_host.name = m_clap_host_name.c_str();
             }
+            app->m_vptr->i_unk.unref(app);
         }
     }
 

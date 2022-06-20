@@ -280,17 +280,28 @@ v3_result V3_API ct_edit_controller::set_component_handler(void *self_, v3_compo
     ct_component *comp = self->m_comp;
     v3::component_handler *handler = (v3::component_handler *)handler_;
 
-    if (comp->m_handler != handler) {
-        v3::component_handler *old = comp->m_handler;
-        if (old)
-            old->m_vptr->i_unk.unref(old);
-        if (handler)
-            handler->m_vptr->i_unk.ref(handler);
+    if (comp->m_handler == handler)
+        LOG_PLUGIN_RET(V3_OK);
+
+    //
+    if (v3::component_handler *old = comp->m_handler) {
+        old->m_vptr->i_unk.unref(old);
+        comp->m_handler = nullptr;
+
+        if (v3::component_handler2 *old2 = comp->m_handler2) {
+            old2->m_vptr->i_unk.unref(old2);
+            comp->m_handler2 = nullptr;
+        }
+    }
+
+    //
+    if (handler) {
+        handler->m_vptr->i_unk.ref(handler);
         comp->m_handler = handler;
 
         v3::component_handler2 *handler2 = nullptr;
-        comp->m_handler2 = (handler && handler->m_vptr->i_unk.query_interface(handler, v3_component_handler2_iid, (void **)&handler2) == V3_OK) ?
-            handler2 : nullptr;
+        if (handler->m_vptr->i_unk.query_interface(handler, v3_component_handler2_iid, (void **)&handler2) == V3_OK)
+            comp->m_handler2 = handler2;
     }
 
     LOG_PLUGIN_RET(V3_OK);

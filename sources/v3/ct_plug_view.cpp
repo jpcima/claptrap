@@ -102,9 +102,14 @@ static bool validate_frame(v3::plugin_frame *frame)
 {
 #if CT_X11
     // ensure we have a frame and a runloop in X11
-    v3::run_loop *runloop = nullptr;
-    if (!frame || frame->m_vptr->i_unk.query_interface(frame, v3_run_loop_iid, (void **)&runloop) != V3_OK)
+    if (!frame)
         return false;
+
+    v3::run_loop *runloop = nullptr;
+    if (frame->m_vptr->i_unk.query_interface(frame, v3_run_loop_iid, (void **)&runloop) != V3_OK)
+        return false;
+    else
+        runloop->m_vptr->i_unk.unref(runloop);
 #endif
 
     return true;

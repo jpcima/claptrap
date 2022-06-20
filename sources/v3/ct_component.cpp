@@ -121,6 +121,10 @@ ct_component::~ct_component()
         ct_host::timer_support__unregister_timer(&m_host->m_clap_host, m_idle_timer_id);
     if (ct_plug_view *editor = m_editor)
         editor->m_vptr->i_unk.unref(editor);
+    if (m_handler)
+        m_handler->m_vptr->i_unk.unref(m_handler);
+    if (m_handler2)
+        m_handler2->m_vptr->i_unk.unref(m_handler2);
     if (const clap_plugin *plug = m_plug)
         CLAP_CALL(plug, destroy, plug);
 }
