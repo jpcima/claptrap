@@ -7,10 +7,10 @@
 #define CT_MESSAGE_PREFIX        "[ct] "
 #define CT_MESSAGE_PREFIX_SPACES "     "
 
-#define CT_WARNING(format, ...)                 \
+#define CT_WARNING(...)                         \
     CT_MESSAGE("Warning: ", ##__VA_ARGS__);
 
-#define CT_FATAL(format, ...) do {              \
+#define CT_FATAL(...) do {                      \
         CT_MESSAGE("Fatal: ", ##__VA_ARGS__);   \
         std::abort();                           \
     } while (0)
