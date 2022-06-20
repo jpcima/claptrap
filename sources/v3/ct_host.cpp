@@ -1,6 +1,7 @@
 #include "ct_host.hpp"
 #include "ct_host_loop.hpp"
 #include "ct_component.hpp"
+#include "ct_threads.hpp"
 #include "utility/ct_assert.hpp"
 #include "utility/ct_messages.hpp"
 #include "utility/unicode_helpers.hpp"
@@ -59,6 +60,8 @@ void ct_host::request_restart(const clap_host *host)
     //XXX according to clap, plugin should deactivate/reactivate
     // v3 doesn't mention anything special
 
+    main_thread_guard mtg;
+
     ct_component *comp = (ct_component *)host->host_data;
     v3::component_handler *handler = comp->m_handler;
 
@@ -86,6 +89,8 @@ void ct_host::request_callback(const clap_host *host)
 //------------------------------------------------------------------------------
 void ct_host::latency__changed(const clap_host *host)
 {
+    main_thread_guard mtg;
+
     ct_component *comp = (ct_component *)host->host_data;
     v3::component_handler *handler = comp->m_handler;
 
@@ -98,6 +103,8 @@ void ct_host::latency__changed(const clap_host *host)
 //------------------------------------------------------------------------------
 void ct_host::params__rescan(const clap_host *host, clap_param_rescan_flags flags)
 {
+    main_thread_guard mtg;
+
     ct_component *comp = (ct_component *)host->host_data;
     v3::component_handler *handler = comp->m_handler;
 
@@ -140,6 +147,8 @@ void ct_host::params__request_flush(const clap_host *host)
 //------------------------------------------------------------------------------
 void ct_host::state__mark_dirty(const clap_host *host)
 {
+    main_thread_guard mtg;
+
     ct_component *comp = (ct_component *)host->host_data;
     v3::component_handler2 *handler2 = comp->m_handler2;
 
