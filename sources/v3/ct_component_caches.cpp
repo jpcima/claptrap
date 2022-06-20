@@ -101,7 +101,7 @@ static void cache_audio_ports_internal(
     for (uint32_t i = 0; i < count; ++i) {
         ct_clap_port_info info{};
         if (!CLAP_CALL(audio_ports, get, plug, i, is_input, &info))
-            CT_FATAL("Failed to get {} port: {}", is_input ? "input" : "output", i);
+            CT_FATAL("Failed to get ", is_input ? "input" : "output", " port: ", i);
 
         if (channel_counter)
             *channel_counter += info.channel_count;
@@ -144,12 +144,12 @@ void ct_caches::impl::cache_audio_port_configs()
     for (uint32_t c_idx = 0; c_idx < count; ++c_idx) {
         ports_config_t info{};
         if (!CLAP_CALL(audio_ports_config, get, plug, c_idx, &info.m_config)) {
-            CT_WARNING("Could not query audio config {}", c_idx);
+            CT_WARNING("Could not query audio config ", c_idx);
             continue;
         }
 
         if (!CLAP_CALL(audio_ports_config, select, plug, info.m_config.id)) {
-            CT_WARNING("Could not select audio config {}", c_idx);
+            CT_WARNING("Could not select audio config ", c_idx);
             continue;
         }
 
@@ -164,12 +164,12 @@ void ct_caches::impl::cache_audio_port_configs()
         {
             uint32_t inputs_got = (uint32_t)info.m_inputs.size();
             if (inputs_got != input_count)
-                CT_FATAL("Inconsistent inputs from port config: expected {}, got {}", input_count, inputs_got);
+                CT_FATAL("Inconsistent inputs from port config: expected ", input_count, ", got ", inputs_got);
         }
         {
             uint32_t outputs_got = (uint32_t)info.m_outputs.size();
             if (outputs_got != output_count)
-                CT_FATAL("Inconsistent outputs from port config: expected {}, got {}", output_count, outputs_got);
+                CT_FATAL("Inconsistent outputs from port config: expected ", output_count, ", got ", outputs_got);
         }
 
         // check channel mapping validity
@@ -177,12 +177,12 @@ void ct_caches::impl::cache_audio_port_configs()
         for (uint32_t p_idx = 0; maps_valid && p_idx < input_count; ++p_idx) {
             maps_valid = info.m_inputs[p_idx].mapping.is_valid();
             if (!maps_valid)
-                CT_WARNING("Invalid input mapping {} in port config {}", p_idx, c_idx);
+                CT_WARNING("Invalid input mapping ", p_idx, " in port config ", c_idx);
         }
         for (uint32_t p_idx = 0; maps_valid && p_idx < output_count; ++p_idx) {
             maps_valid = info.m_outputs[p_idx].mapping.is_valid();
             if (!maps_valid)
-                CT_WARNING("Invalid output mapping {} in port config {}", p_idx, c_idx);
+                CT_WARNING("Invalid output mapping ", p_idx, " in port config ", c_idx);
         }
 
         if (!maps_valid)
@@ -241,11 +241,11 @@ void ct_caches::impl::cache_audio_ports(bool do_callback)
     const uint32_t output_count = (uint32_t)audio_ports->m_outputs.size();
     for (uint32_t p_idx = 0; p_idx < input_count; ++p_idx) {
         if (!audio_ports->m_inputs[p_idx].mapping.is_valid())
-            CT_FATAL("Invalid input mapping {}", p_idx);
+            CT_FATAL("Invalid input mapping ", p_idx);
     }
     for (uint32_t p_idx = 0; p_idx < output_count; ++p_idx) {
         if (!audio_ports->m_outputs[p_idx].mapping.is_valid())
-            CT_FATAL("Invalid output mapping {}", p_idx);
+            CT_FATAL("Invalid output mapping ", p_idx);
     }
 
     m_dirty_flags &= ~cache_flags_audio_ports;
@@ -284,7 +284,7 @@ void ct_caches::impl::cache_params()
     for (uint32_t i = 0; i < count; ++i) {
         clap_param_info info{};
         if (!CLAP_CALL(params, get_info, plug, i, &info))
-            CT_FATAL("Failed to get parameter: {}", i);
+            CT_FATAL("Failed to get parameter: ", i);
         uint32_t idx = (uint32_t)result.size();
         result.push_back(info);
         result_idx_map.set(info.id, idx);

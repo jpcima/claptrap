@@ -16,6 +16,7 @@
 #include <condition_variable>
 #include <limits>
 #include <type_traits>
+#include <cstring>
 #include <cstdint>
 
 namespace ct {

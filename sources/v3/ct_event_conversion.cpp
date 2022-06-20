@@ -3,6 +3,7 @@
 #include "ct_component.hpp"
 #include "clap_helpers.hpp"
 #include <travesty/events.h>
+#include <cstring>
 #include <cstdlib>
 
 namespace ct {

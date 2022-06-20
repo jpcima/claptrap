@@ -3,6 +3,7 @@
 #include "travesty_helpers.hpp"
 #include <clap/clap.h>
 #include <string>
+#include <memory>
 
 namespace ct {
 

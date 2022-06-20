@@ -33,8 +33,6 @@ option(CT_EXAMPLES "Build the examples" "${CT_BUILD_FROM_HERE}")
 option(CT_LIVE_EDITING "Enable live editing with VSTGUI" OFF)
 option(CT_ASSERTIONS "Enable assertions regardless of build type" OFF)
 option(CT_DOWNLOAD_CLAP "Download the CLAP library" OFF)
-option(CT_DOWNLOAD_FMT "Download the fmt library" OFF)
-option(CT_FMT_HEADER_ONLY "Use fmt in a header-only fashion" OFF)
 set(CT_CLAP_INCLUDE_DIR "" CACHE FILEPATH "Path to CLAP headers (optional)")
 
 ###
@@ -103,15 +101,12 @@ add_library(ct-v3 OBJECT
   "sources/utility/unicode_helpers.hpp"
   "sources/utility/url_helpers.cpp"
   "sources/utility/url_helpers.hpp"
-  "sources/libs/fmt.hpp"
   "sources/libs/heapsort.hpp"
   "sources/libs/span.hpp"
   "sources/libs/utf.hpp")
-target_precompile_headers(ct-v3 PRIVATE
-  "sources/libs/fmt.hpp")
 target_compile_definitions(ct-v3 PUBLIC "CLAP_EXPORT=")
 target_include_directories(ct-v3 PRIVATE "sources")
-target_link_libraries(ct-v3 PUBLIC ct-clap PRIVATE ct-travesty ct-fmt sane-warning-flags Threads::Threads)
+target_link_libraries(ct-v3 PUBLIC ct-clap PRIVATE ct-travesty sane-warning-flags Threads::Threads)
 
 if(CT_ASSERTIONS)
   target_compile_definitions(ct-v3 PRIVATE "CT_ASSERTIONS")

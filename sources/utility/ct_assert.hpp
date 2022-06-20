@@ -10,10 +10,10 @@
 #endif
 
 #if defined(CT_ASSERTIONS) || !defined(NDEBUG)
-#define CT_ASSERT(x) do { if (CT_UNLIKELY(!(x))) {                    \
-        CT_FATAL("Assertion failed ({}) at {}:{}\n",                  \
-                 #x, __FILE__, __LINE__);                             \
-    } } while (0)
+#define CT_ASSERT(x) do { if (CT_UNLIKELY(!(x))) {      \
+            CT_FATAL("Assertion failed (", #x, ") at ", \
+                     __FILE__, ":", __LINE__);          \
+        } } while (0)
 #else
 #define CT_ASSERT(x)
 #endif
