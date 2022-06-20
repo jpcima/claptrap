@@ -264,10 +264,10 @@ void threaded_run_loop::receive_message(message &msg)
 
 //------------------------------------------------------------------------------
 threaded_run_loop::background::background(threaded_run_loop *self)
-    : m_self(self),
-      m_thread([this]() { run(); })
+    : m_self{self}
 {
     m_pollfds.reserve(64);
+    m_thread = std::thread{[this]() { run(); }};
 }
 
 void threaded_run_loop::background::run()
