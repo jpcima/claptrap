@@ -14,6 +14,7 @@
 #include "ct_events.hpp"
 #include "ct_event_conversion.hpp"
 #include "ct_component_caches.hpp"
+#include "ct_threads.hpp"
 #include "clap_helpers.hpp"
 #include "utility/unicode_helpers.hpp"
 #include "utility/ct_messages.hpp"
@@ -110,38 +111,12 @@ ct_component::ct_component(const v3_tuid clsiid, const clap_plugin_factory *fact
     cache->on_cache_update = &on_cache_update;
     cache->update_caches_now();
 
-    // idle timer
-    if (host->m_host_loop->register_timer(v3_idle_timer_interval, &m_idle_timer_id, true))
-        m_have_idle_timer = true;
-
-#if CT_X11
-    // substitute run loop in absence of open UI
-    threaded_run_loop *runloop = threaded_run_loop::instance();
-    set_run_loop((v3::run_loop *)runloop);
-    runloop->m_vptr->i_unk.unref(runloop);
-#endif
-
     //
     *init_ok = true;
 }
 
 ct_component::~ct_component()
 {
-    if (m_have_idle_timer)
-        m_host->m_host_loop->unregister_timer(m_idle_timer_id);
-
-    if (ct_plug_view *editor = m_editor)
-        editor->m_vptr->i_unk.unref(editor);
-
-#if CT_X11
-    set_run_loop(nullptr);
-#endif
-
-    if (m_handler)
-        m_handler->m_vptr->i_unk.unref(m_handler);
-    if (m_handler2)
-        m_handler2->m_vptr->i_unk.unref(m_handler2);
-
     if (const clap_plugin *plug = m_plug)
         CLAP_CALL(plug, destroy, plug);
 }
@@ -259,10 +234,23 @@ v3_result V3_API ct_component::initialize(void *self_, v3_funknown **context_)
     if (self->m_initialized)
         LOG_PLUGIN_RET(V3_OK);
 
+    //
     self->m_context = context;
     if (context)
         context->m_vptr->i_unk.ref(context);
 
+#if CT_X11
+    // run loop
+    threaded_run_loop *runloop = threaded_run_loop::instance();
+    self->set_run_loop((v3::run_loop *)runloop);
+    runloop->m_vptr->i_unk.unref(runloop);
+#endif
+
+    // idle timer
+    if (self->m_host->m_host_loop->register_timer(v3_idle_timer_interval, &self->m_idle_timer_id, true))
+        self->m_have_idle_timer = true;
+
+    //
     self->m_initialized = true;
     LOG_PLUGIN_RET(V3_OK);
 }
@@ -276,11 +264,36 @@ v3_result V3_API ct_component::terminate(void *self_)
     if (!self->m_initialized)
         LOG_PLUGIN_RET(V3_OK);
 
+    // idle timer
+    if (self->m_have_idle_timer)
+        self->m_host->m_host_loop->unregister_timer(self->m_idle_timer_id);
+
+    // editor
+    if (ct_plug_view *editor = self->m_editor)
+        editor->m_vptr->i_unk.unref(editor);
+
+#if CT_X11
+    // run loop
+    self->set_run_loop(nullptr);
+#endif
+
+    // component handlers
+    if (self->m_handler) {
+        self->m_handler->m_vptr->i_unk.unref(self->m_handler);
+        self->m_handler = nullptr;
+    }
+    if (self->m_handler2) {
+        self->m_handler2->m_vptr->i_unk.unref(self->m_handler2);
+        self->m_handler2 = nullptr;
+    }
+
+    //
     if (v3::object *context = self->m_context) {
         context->m_vptr->i_unk.unref(context);
         self->m_context = nullptr;
     }
 
+    //
     self->m_initialized = false;
     LOG_PLUGIN_RET(V3_OK);
 }
@@ -453,6 +466,8 @@ static void deallocate_buffers(ct_component *self)
 v3_result V3_API ct_component::set_active(void *self_, v3_bool state)
 {
     LOG_PLUGIN_SELF_CALL(self_);
+
+    main_thread_guard mtg;
 
     ct_component *self = (ct_component *)self_;
 

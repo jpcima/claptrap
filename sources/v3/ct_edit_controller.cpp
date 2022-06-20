@@ -3,6 +3,7 @@
 #include "ct_plug_view.hpp"
 #include "ct_unit_description.hpp"
 #include "ct_component_caches.hpp"
+#include "ct_threads.hpp"
 #if CT_X11
 #include "ct_host_loop_posix.hpp"
 #endif
@@ -278,6 +279,8 @@ v3_result V3_API ct_edit_controller::set_parameter_normalised(void *self_, v3_pa
 v3_result V3_API ct_edit_controller::set_component_handler(void *self_, v3_component_handler **handler_)
 {
     LOG_PLUGIN_SELF_CALL(self_);
+
+    main_thread_guard mtg;
 
     ct_edit_controller *self = (ct_edit_controller *)self_;
     ct_component *comp = self->m_comp;

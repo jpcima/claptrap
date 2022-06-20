@@ -1,6 +1,7 @@
 #include "ct_host_loop_posix.hpp"
 
 #if CT_X11
+#include "ct_threads.hpp"
 #include "travesty_helpers.hpp"
 #include "utility/ct_assert.hpp"
 #include <poll.h>
@@ -314,6 +315,7 @@ void threaded_run_loop::background::run()
                     case slot::fd:
                     {
                         v3::event_handler *handler = (v3::event_handler *)sl->m_handler;
+                        main_thread_guard mtg;
                         handler->m_vptr->i_handler.on_fd_is_set(handler, fd);
                         break;
                     }
@@ -324,6 +326,7 @@ void threaded_run_loop::background::run()
                         read(fd, &expirations, sizeof(expirations));
 
                         v3::timer_handler *handler = (v3::timer_handler *)sl->m_handler;
+                        main_thread_guard mtg;
                         handler->m_vptr->i_handler.on_timer(handler);
                         break;
                     }

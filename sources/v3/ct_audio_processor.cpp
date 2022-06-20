@@ -3,6 +3,7 @@
 #include "ct_events.hpp"
 #include "ct_event_conversion.hpp"
 #include "ct_component_caches.hpp"
+#include "ct_threads.hpp"
 #include "clap_helpers.hpp"
 #include "utility/ct_bump_allocator.hpp"
 #include "utility/ct_messages.hpp"
@@ -43,6 +44,8 @@ uint32_t V3_API ct_audio_processor::unref(void *self_)
 v3_result V3_API ct_audio_processor::set_bus_arrangements(void *self_, v3_speaker_arrangement *inputs, int32_t num_inputs, v3_speaker_arrangement *outputs, int32_t num_outputs)
 {
     LOG_PLUGIN_SELF_CALL(self_);
+
+    main_thread_guard mtg;
 
     ct_audio_processor *self = (ct_audio_processor *)self_;
     ct_component *comp = self->m_comp;
@@ -152,6 +155,8 @@ uint32_t V3_API ct_audio_processor::get_latency_samples(void *self_)
 v3_result V3_API ct_audio_processor::setup_processing(void *self_, v3_process_setup *setup)
 {
     LOG_PLUGIN_SELF_CALL(self_);
+
+    main_thread_guard mtg;
 
     ct_audio_processor *self = (ct_audio_processor *)self_;
     ct_component *comp = self->m_comp;

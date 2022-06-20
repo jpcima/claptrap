@@ -82,6 +82,8 @@ add_library(ct-v3 OBJECT
   "sources/v3/ct_plugin_factory.hpp"
   "sources/v3/ct_stream.cpp"
   "sources/v3/ct_stream.hpp"
+  "sources/v3/ct_threads.cpp"
+  "sources/v3/ct_threads.hpp"
   "sources/v3/clap_helpers.cpp"
   "sources/v3/clap_helpers.hpp"
   "sources/v3/travesty_helpers.hpp"
